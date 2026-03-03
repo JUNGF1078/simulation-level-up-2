@@ -296,3 +296,272 @@ canvas.radar{border-radius:10px}
   .hero-title{font-size:26px}.results-grid{grid-template-columns:1fr}
   .steps .step span{display:none}.round-history{grid-template-columns:1fr}
 }
+
+/* ══════════════════════════════════════════
+   NES.CSS DARK THEME OVERRIDES
+   ══════════════════════════════════════════ */
+
+/* 1. Reset body (NES.css forces Press Start 2P + white bg globally) */
+body{
+  font-family:var(--font);
+  background-color:var(--bg);
+  color:var(--text);
+  padding:0;
+  margin:0;
+}
+/* NES.css resets html font to Press Start 2P — counter that for base text */
+html{font-size:16px}
+*,*::before,*::after{box-sizing:border-box}
+
+/* 2. Press Start 2P — applied selectively for retro feel */
+.brand,
+.hero-tag,
+.section-title,
+.sim-title,
+.preview-title,
+.nes-btn,
+.tab-btn,
+.grade-label{
+  font-family:'Press Start 2P',cursive;
+}
+.brand{font-size:11px;letter-spacing:2px}
+.hero-tag{font-size:9px;letter-spacing:1px}
+.section-title{font-size:9px;letter-spacing:.5px;line-height:1.6}
+.sim-title{font-size:16px}
+.preview-title{font-size:8px;letter-spacing:.5px}
+.grade-label{font-size:14px}
+
+/* 3. NES.css button overrides — keep pixel border, adapt colors */
+.nes-btn{
+  font-size:10px;
+  line-height:1.4;
+  white-space:normal;
+  word-break:break-word;
+}
+.btn.nes-btn.btn-primary,.nes-btn.is-primary{
+  background-color:#209cee;
+  color:#fff;
+}
+.btn.nes-btn.btn-accent,.nes-btn.is-success{
+  background-color:#4aa52e;
+  color:#fff;
+}
+/* Tab buttons — default (unactive) NES look */
+.tab-btn.nes-btn{
+  background-color:var(--card2);
+  color:var(--muted);
+  border:0;
+  font-size:8px;
+  padding:8px 12px;
+  margin:2px;
+}
+.tab-btn.nes-btn:hover{
+  background-color:var(--card);
+  color:var(--text);
+}
+.tab-btn.nes-btn.active{
+  background-color:#209cee;
+  color:#fff;
+}
+/* Prevent NES.css ::after border-box from blocking clicks */
+.nes-btn::after{pointer-events:none}
+
+/* 4. NES container — dark theme adaptation */
+.nes-container{
+  background-color:var(--card);
+  border-color:var(--border);
+  border-width:4px;
+  border-radius:0;
+  color:var(--text);
+  margin:0 0 16px 0;
+  padding:20px;
+}
+/* section-card NES container */
+.section-card.nes-container{
+  border-radius:0;
+  padding:20px;
+  margin-bottom:16px;
+}
+/* The outer shadow pseudo-element on .is-dark containers */
+.nes-container.is-dark{
+  background-color:var(--card2);
+  border-color:var(--muted);
+  color:var(--text);
+}
+.nes-container.is-dark::after{
+  background-color:var(--card2);
+}
+/* NES with-title: title tab at top border */
+.nes-container.with-title>.title{
+  background-color:var(--card);
+  color:var(--primary);
+  font-family:'Press Start 2P',cursive;
+  font-size:9px;
+  letter-spacing:.5px;
+  padding:0 8px;
+  margin:-1.8rem 0 1rem;
+}
+/* Crisis box NES container */
+.crisis-box.nes-container{
+  background-color:#1a0a0a;
+  border-color:#5a1a1a;
+}
+.crisis-box.nes-container.with-title>.title{
+  background-color:#1a0a0a;
+  color:var(--danger);
+}
+/* Objectives NES container */
+.objectives.nes-container{
+  background-color:var(--card);
+  border-color:var(--warn);
+}
+.objectives.nes-container.with-title>.title{
+  background-color:var(--card);
+  color:var(--warn);
+}
+/* Profit-big NES container */
+.profit-big.nes-container{
+  background-color:#0a1628;
+  border-color:var(--border);
+  text-align:center;
+  padding:14px;
+  margin:0;
+}
+/* Sim-totals NES container */
+.sim-totals.nes-container{
+  background-color:var(--card);
+  border-color:var(--border);
+  padding:20px;
+  margin-top:20px;
+  opacity:0;
+  transition:.5s;
+}
+.sim-totals.nes-container.visible{opacity:1}
+/* Constraint list NES container */
+.constraint-list.nes-container{
+  background-color:var(--card);
+  border-color:var(--border);
+  padding:22px;
+  margin-bottom:20px;
+}
+/* Bar sections NES container */
+.bar-section.nes-container{
+  background-color:var(--card);
+  border-color:var(--border);
+  padding:22px;
+  margin-bottom:20px;
+}
+/* Competency section NES container */
+.competency-section.nes-container{
+  background-color:var(--card);
+  border-color:var(--border);
+  padding:22px;
+  margin-bottom:20px;
+}
+/* Assessment box NES container */
+.assessment-box.nes-container{
+  background-color:var(--card);
+  border-color:var(--border);
+  padding:24px;
+  margin-bottom:20px;
+}
+.assessment-box.nes-container.with-title>.title{
+  background-color:var(--card);
+  color:var(--primary);
+}
+
+/* 5. NES table — dark theme */
+.nes-table,.cabor-table.nes-table{
+  table-layout:auto;
+  background-color:transparent;
+  color:var(--text);
+  width:100%;
+}
+.cabor-table.nes-table th,
+.cabor-table.nes-table td{
+  border-color:var(--border);
+  color:var(--text);
+}
+.cabor-table.nes-table th::before,
+.cabor-table.nes-table th::after,
+.cabor-table.nes-table td::before,
+.cabor-table.nes-table td::after{
+  background-color:var(--border);
+}
+.cabor-table.nes-table thead tr{
+  background-color:var(--card2);
+}
+
+/* 6a. Preserve dark-theme for elements NES.css may reset */
+.venue-card,.venue-slot,.slider-val,.c-badge,.score-card,.round-card{
+  background-color:var(--card);
+}
+.venue-card{background:#0a1628}
+.slider-val{background:var(--card2);border:1px solid var(--border);color:var(--text)}
+/* Top bar should stay dark (NES.css body padding might push it) */
+#topbar{background:#0a1628;border-bottom:1px solid var(--border)}
+
+/* 6. NES checkbox dark theme */
+.nes-checkbox.is-dark+span::before{
+  color:var(--text);
+}
+/* Prevent checkbox span margin from causing layout issues in our custom label */
+.nes-checkbox-label .nes-checkbox{
+  margin-left:0;
+}
+.nes-checkbox-label .nes-checkbox+span{
+  margin-left:0;
+}
+
+/* 7. Heading/text resets (NES.css may reset these) */
+h1,h2,h3,h4,h5,h6{font-family:var(--font)}
+.hero-title{font-family:var(--font);font-size:38px;font-weight:800}
+.hero-title em{font-family:var(--font)}
+input,select,textarea,label{font-family:var(--font)}
+table{font-family:var(--font)}
+p{font-family:var(--font)}
+
+/* 8. Score card improvements */
+.score-card.nes-container{
+  background-color:var(--card);
+  border-color:var(--border);
+  padding:22px;
+  text-align:center;
+}
+.score-card.nes-container.good{border-color:var(--accent)}
+.score-card.nes-container.bad{border-color:var(--danger)}
+.score-card.nes-container.warn{border-color:var(--warn)}
+.s-label{font-family:'Press Start 2P',cursive;font-size:8px;line-height:1.6}
+
+/* 9. Sim-step NES container states */
+.sim-step.nes-container{
+  background-color:var(--card);
+  border-color:var(--border);
+  padding:14px 20px;
+  margin-bottom:10px;
+  opacity:.3;
+  transition:.4s;
+  display:flex;align-items:center;gap:14px;
+}
+.sim-step.nes-container.running{opacity:1;border-color:var(--primary)}
+.sim-step.nes-container.done{opacity:1;border-color:var(--accent)}
+
+/* 10. Info cards in briefing */
+.info-card.nes-container{
+  background-color:var(--card);
+  border-color:var(--border);
+  padding:20px;
+  margin:0;
+}
+
+/* 12. Round history cards */
+.round-card.nes-container{
+  background-color:var(--card);
+  border-color:var(--border);
+  padding:16px;
+  text-align:center;
+  opacity:.4;
+  margin:0;
+}
+.round-card.nes-container.done{opacity:1;border-color:var(--accent)}
+.round-card.nes-container.active{opacity:1;border-color:var(--primary)}

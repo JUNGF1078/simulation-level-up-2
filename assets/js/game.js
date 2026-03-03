@@ -400,22 +400,22 @@ function renderBriefing(){
   } else { crisisBox.style.display='none'; }
 
   document.getElementById('briefing-info').innerHTML = `
-    <div class="info-card"><div class="label">Ronde</div><div class="value">${r.id} / 3</div><div class="unit">${r.name}</div></div>
-    <div class="info-card"><div class="label">Anggaran</div><div class="value text-primary">${r.budget.toLocaleString()}</div><div class="unit">Juta IDR</div></div>
-    <div class="info-card"><div class="label">Jumlah Cabor</div><div class="value">${r.minCabor}–${r.maxCabor}</div><div class="unit">Cabang olahraga</div></div>
-    <div class="info-card"><div class="label">Target Profit</div><div class="value ${r.minProfit?'text-warn':'text-accent'}">${r.minProfit?r.minProfit+'+':'Positif'}</div><div class="unit">${r.minProfit?'Minimum (M)':'Break even'}</div></div>
+    <div class="info-card nes-container"><div class="label">Ronde</div><div class="value">${r.id} / 3</div><div class="unit">${r.name}</div></div>
+    <div class="info-card nes-container"><div class="label">Anggaran</div><div class="value text-primary">${r.budget.toLocaleString()}</div><div class="unit">Juta IDR</div></div>
+    <div class="info-card nes-container"><div class="label">Jumlah Cabor</div><div class="value">${r.minCabor}–${r.maxCabor}</div><div class="unit">Cabang olahraga</div></div>
+    <div class="info-card nes-container"><div class="label">Target Profit</div><div class="value ${r.minProfit?'text-warn':'text-accent'}">${r.minProfit?r.minProfit+'+':'Positif'}</div><div class="unit">${r.minProfit?'Minimum (M)':'Break even'}</div></div>
   `;
 
   document.getElementById('briefing-objectives').innerHTML = `
-    <h3>${r.name}</h3>
-    <p style="color:var(--muted);font-size:13px;margin:8px 0 16px">${r.desc}</p>
+    <p class="title">${r.name}</p>
+    <p style="color:var(--muted);font-size:12px;margin:8px 0 16px;font-family:var(--font)">${r.desc}</p>
     ${r.obj.map((o,i)=>`<div class="obj-item"><div class="obj-icon" style="background:rgba(14,165,233,.1);color:var(--primary)">${i+1}</div>${o}</div>`).join('')}
   `;
 
   document.getElementById('round-history').innerHTML = C.rounds.map((rd,i)=>{
     const h = G.history[i];
     const cls = h?'done':(i===G.round?'active':'');
-    return `<div class="round-card ${cls}">
+    return `<div class="round-card nes-container ${cls}">
       <div class="r-num">Ronde ${rd.id}</div>
       <div class="r-profit" style="color:${h?color(h.profit):'var(--muted)'}">${h?fmtM(h.profit):'—'}</div>
       <div class="r-score">${h?`Skor: ${h.scores.total}`:'Belum dimainkan'}</div>
@@ -686,7 +686,7 @@ async function runSimulation(){
 
   const container = document.getElementById('sim-steps');
   container.innerHTML = steps.map((_,i)=>`
-    <div class="sim-step" id="sim-step-${i}">
+    <div class="sim-step nes-container" id="sim-step-${i}">
       <div class="ico">${steps[i].ico}</div>
       <div class="info"><div class="name">${steps[i].name}</div><div class="detail">${steps[i].detail}</div></div>
       <div class="amount" id="sim-amt-${i}">—</div>
@@ -742,23 +742,23 @@ function showResults(){
   document.getElementById('results-round-label').textContent = `Ronde ${r.id} dari 3 – ${r.name}`;
 
   document.getElementById('score-cards').innerHTML = `
-    <div class="score-card ${sc.profitScore>=60?'good':sc.profitScore>=30?'warn':'bad'}">
+    <div class="score-card nes-container ${sc.profitScore>=60?'good':sc.profitScore>=30?'warn':'bad'}">
       <div class="s-label">Skor Profit</div><div class="s-value">${sc.profitScore}</div>
       <div class="s-sub">${fmtM(res.profit)} net profit · bobot 35%</div>
     </div>
-    <div class="score-card ${sc.complianceScore>=80?'good':sc.complianceScore>=50?'warn':'bad'}">
+    <div class="score-card nes-container ${sc.complianceScore>=80?'good':sc.complianceScore>=50?'warn':'bad'}">
       <div class="s-label">Kepatuhan Constraint</div><div class="s-value">${sc.complianceScore}</div>
       <div class="s-sub">${[res.constraints.power.ok,res.constraints.toilet.ok,res.constraints.staff.ok,res.constraints.budget.ok,res.constraints.branches.ok].filter(Boolean).length}/5 terpenuhi · bobot 30%</div>
     </div>
-    <div class="score-card ${sc.effScore>=60?'good':sc.effScore>=30?'warn':'bad'}">
+    <div class="score-card nes-container ${sc.effScore>=60?'good':sc.effScore>=30?'warn':'bad'}">
       <div class="s-label">Efisiensi</div><div class="s-value">${sc.effScore}</div>
       <div class="s-sub">Rev/Biaya = ${(res.totalRevenue/Math.max(res.totalCost,1)).toFixed(2)}× · bobot 20%</div>
     </div>
-    <div class="score-card ${sc.riskScore>=60?'good':sc.riskScore>=30?'warn':'bad'}">
+    <div class="score-card nes-container ${sc.riskScore>=60?'good':sc.riskScore>=30?'warn':'bad'}">
       <div class="s-label">Stabilitas / Risiko</div><div class="s-value">${sc.riskScore}</div>
       <div class="s-sub">Broadcasting: ${res.hasBroadcasting?'Aktif':'Tidak'} · bobot 15%</div>
     </div>
-    <div class="score-card ${sc.total>=70?'good':sc.total>=40?'warn':'bad'}" style="border:2px solid var(--primary)">
+    <div class="score-card nes-container ${sc.total>=70?'good':sc.total>=40?'warn':'bad'}" style="border-color:var(--primary)">
       <div class="s-label">Skor Total Ronde</div>
       <div class="s-value" style="font-size:56px">${sc.total}</div>
       <div class="s-sub">${getGrade(sc.total)}</div>
