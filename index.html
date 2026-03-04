@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Level Up Simulation – Sports Event Ecosystem</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/carbon-components@10.58.4/css/carbon-components.min.css">
 <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
@@ -34,19 +32,19 @@
     <h1 class="hero-title">Anda adalah <em>Event Director</em>.<br>Rancang event olahraga terbaik bangsa.</h1>
     <p class="hero-sub">Alokasikan anggaran terbatas untuk venue, cabang olahraga, fasilitas, dan operasional. Setiap keputusan memiliki konsekuensi. Buat pilihan yang tepat.</p>
 
-    <div id="crisis-box" class="crisis-box bx--tile" style="display:none">
-      <h3 class="section-title" style="color:var(--danger)">⚠ Kondisi Krisis Aktif</h3>
+    <div id="crisis-box" class="crisis-box" style="display:none">
+      <h3>⚠ Kondisi Krisis Aktif</h3>
       <div id="crisis-items"></div>
     </div>
 
     <div class="info-grid" id="briefing-info"></div>
 
-    <div class="objectives bx--tile" id="briefing-objectives">
-      <h3 class="section-title" style="color:var(--warn)">Objektif Ronde</h3>
+    <div class="objectives" id="briefing-objectives">
+      <h3>Objektif Ronde</h3>
     </div>
 
     <div style="text-align:center">
-      <button class="btn btn-primary btn-lg bx--btn bx--btn--primary" onclick="startPlanning()">Mulai Fase Planning</button>
+      <button class="btn btn-primary btn-lg" onclick="startPlanning()">Mulai Fase Planning →</button>
     </div>
 
     <div class="round-history mt-24" id="round-history"></div>
@@ -59,16 +57,16 @@
 
     <!-- LEFT: DECISIONS -->
     <div class="decisions-panel">
-      <div class="tabs bx--content-switcher" id="planning-tabs">
-        <button class="tab-btn bx--content-switcher-btn active" onclick="switchTab('venue')">🏟 Venue</button>
-        <button class="tab-btn bx--content-switcher-btn" onclick="switchTab('cabor')">⚽ Cabor</button>
-        <button class="tab-btn bx--content-switcher-btn" onclick="switchTab('fasilitas')">🔧 Fasilitas</button>
-        <button class="tab-btn bx--content-switcher-btn" onclick="switchTab('listrik')">⚡ Listrik</button>
+      <div class="tabs" id="planning-tabs">
+        <button class="tab-btn active" onclick="switchTab('venue')">🏟 Venue</button>
+        <button class="tab-btn" onclick="switchTab('cabor')">⚽ Cabang Olahraga</button>
+        <button class="tab-btn" onclick="switchTab('fasilitas')">🔧 Fasilitas</button>
+        <button class="tab-btn" onclick="switchTab('listrik')">⚡ Listrik</button>
       </div>
 
       <!-- TAB: VENUE -->
       <div class="tab-pane active" id="tab-venue">
-        <div class="section-card bx--tile">
+        <div class="section-card">
           <div class="section-title">📅 Durasi Event</div>
           <div class="form-group">
             <label>Hari Sewa Venue (1–5)</label>
@@ -78,7 +76,7 @@
             </div>
           </div>
         </div>
-        <div class="section-card bx--tile">
+        <div class="section-card">
           <div class="section-title">🏟 Pilih Venue
             <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;font-size:12px">
               (dipilih: <span id="selected-venue-count">1</span>/3 maks)
@@ -90,7 +88,7 @@
 
       <!-- TAB: CABOR -->
       <div class="tab-pane" id="tab-cabor">
-        <div class="section-card bx--tile">
+        <div class="section-card">
           <div class="section-title">⚽ Cabang Olahraga
             <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;font-size:12px">
               — dipilih: <span id="total-cabor-label" class="text-accent font-bold">4</span>
@@ -103,7 +101,7 @@
             <span>Total Kebutuhan Listrik: <strong id="cabor-power-total" class="text-primary">—</strong></span>
           </div>
           <div style="overflow-x:auto">
-            <table class="cabor-table bx--data-table">
+            <table class="cabor-table">
               <thead>
                 <tr>
                   <th style="width:30px"></th>
@@ -124,7 +122,7 @@
 
       <!-- TAB: FASILITAS -->
       <div class="tab-pane" id="tab-fasilitas">
-        <div class="section-card bx--tile">
+        <div class="section-card">
           <div class="section-title">🍔 Food & Beverage</div>
           <div class="form-row">
             <div class="form-group">
@@ -143,7 +141,7 @@
             </div>
           </div>
         </div>
-        <div class="section-card bx--tile">
+        <div class="section-card">
           <div class="section-title">🚽 Sanitasi Tambahan</div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
             Toilet dari venue: <span id="toilet-have" class="text-primary">—</span> unit
@@ -157,7 +155,7 @@
             </div>
           </div>
         </div>
-        <div class="section-card bx--tile">
+        <div class="section-card">
           <div class="section-title">💺 Seating Area (×5M)</div>
           <div class="form-group">
             <label>Unit Seating</label>
@@ -167,7 +165,7 @@
             </div>
           </div>
         </div>
-        <div class="section-card bx--tile">
+        <div class="section-card">
           <div class="section-title">👥 Staf & Keamanan</div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
             Biaya: 0.8M/staf &nbsp;|&nbsp; Dibutuhkan: 1 per 50 pengunjung offline &nbsp;|&nbsp;
@@ -181,7 +179,7 @@
             </div>
           </div>
         </div>
-        <div class="section-card bx--tile">
+        <div class="section-card">
           <div class="section-title">📢 Anggaran Marketing</div>
           <div class="btn-group" id="marketing-group">
             <button class="opt" data-val="low"    onclick="selectOpt(this,'marketing-group','marketing')">Rendah (20M · +5%)</button>
@@ -193,7 +191,7 @@
 
       <!-- TAB: LISTRIK -->
       <div class="tab-pane" id="tab-listrik">
-        <div class="section-card bx--tile">
+        <div class="section-card">
           <div class="section-title">⚡ Kapasitas Listrik</div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:14px">
             Supply dari venue: <span id="venue-power-display" class="text-primary">0 kVA</span>
@@ -207,27 +205,27 @@
             </div>
           </div>
         </div>
-        <div class="section-card bx--tile">
+        <div class="section-card">
           <div class="section-title">📡 Online Broadcasting</div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:12px">
             Status broadcasting: <span id="bc-status" class="vc-val neg">✗ Tidak Aktif</span>
             <br><span style="font-size:11px">(Aktif jika venue memiliki fasilitas atau upgrade dibeli)</span>
           </div>
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div class="bx--checkbox-wrapper">
-              <input id="broadcast-upgrade" class="bx--checkbox" type="checkbox" onchange="updatePreview()">
-              <label class="bx--checkbox-label" for="broadcast-upgrade">
-                <span class="bx--checkbox-label-text">Upgrade Broadcasting — 40M</span>
-              </label>
-              <div class="bx--form__helper-text">Aktifkan streaming online jika venue tidak memiliki fasilitas</div>
-            </div>
-            <div class="bx--checkbox-wrapper">
-              <input id="backup-internet" class="bx--checkbox" type="checkbox" onchange="updatePreview()">
-              <label class="bx--checkbox-label" for="backup-internet">
-                <span class="bx--checkbox-label-text">Backup Internet — 15M</span>
-              </label>
-              <div class="bx--form__helper-text">Mencegah kegagalan streaming saat event berlangsung</div>
-            </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;background:var(--card2);padding:12px;border-radius:8px;border:1px solid var(--border)">
+              <input type="checkbox" id="broadcast-upgrade" onchange="updatePreview()" style="accent-color:var(--primary);width:16px;height:16px">
+              <div>
+                <div style="font-weight:600">Upgrade Broadcasting — 40M</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Aktifkan streaming online jika venue tidak memiliki fasilitas</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;background:var(--card2);padding:12px;border-radius:8px;border:1px solid var(--border)">
+              <input type="checkbox" id="backup-internet" onchange="updatePreview()" style="accent-color:var(--primary);width:16px;height:16px">
+              <div>
+                <div style="font-weight:600">Backup Internet — 15M</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Mencegah kegagalan streaming saat event berlangsung</div>
+              </div>
+            </label>
           </div>
         </div>
       </div>
@@ -239,7 +237,7 @@
     <div class="preview-panel">
       <div class="preview-title">Live Preview</div>
 
-      <div class="profit-big bx--tile">
+      <div class="profit-big">
         <div class="label">Estimasi Profit</div>
         <div class="amount" id="preview-profit">—</div>
       </div>
@@ -274,7 +272,7 @@
         <div class="constraint-row"><div class="constraint-dot warn" id="c-branch-dot"></div><span id="c-branch-txt">Min Cabor: —</span></div>
       </div>
 
-      <button class="btn btn-accent btn-block bx--btn bx--btn--tertiary" onclick="runSimulation()" style="margin-top:auto">
+      <button class="btn btn-accent btn-block" onclick="runSimulation()" style="margin-top:auto">
         ▶ Jalankan Simulasi
       </button>
     </div>
@@ -288,9 +286,9 @@
     <div class="sim-title">Menjalankan Simulasi…</div>
     <div class="sim-sub" id="sim-subtitle">Menghitung ekonomi event Anda</div>
     <div id="sim-steps"></div>
-    <div class="sim-totals bx--tile" id="sim-totals"></div>
+    <div class="sim-totals" id="sim-totals"></div>
     <div style="text-align:center;margin-top:24px;display:none" id="sim-next">
-      <button class="btn btn-primary bx--btn bx--btn--primary" onclick="showResults()">Lihat Hasil →</button>
+      <button class="btn btn-primary" onclick="showResults()">Lihat Hasil →</button>
     </div>
   </div>
 </div>
@@ -303,24 +301,24 @@
         <div class="hero-tag" id="results-round-label">Ronde 1 Hasil</div>
         <h2 style="font-size:22px;font-weight:700">Dashboard Performa</h2>
       </div>
-      <button class="btn btn-primary bx--btn bx--btn--primary" id="next-round-btn" onclick="nextRound()">Ronde Berikutnya →</button>
+      <button class="btn btn-primary" id="next-round-btn" onclick="nextRound()">Ronde Berikutnya →</button>
     </div>
 
     <div class="results-grid" id="score-cards"></div>
-    <div class="constraint-list bx--tile" id="constraint-list"></div>
+    <div class="constraint-list" id="constraint-list"></div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:20px">
-      <div class="bar-section bx--tile">
+      <div class="bar-section">
         <div class="section-title">Rincian Biaya</div>
         <div id="cost-bars"></div>
       </div>
-      <div class="bar-section bx--tile">
+      <div class="bar-section">
         <div class="section-title">Rincian Pendapatan</div>
         <div id="rev-bars"></div>
       </div>
     </div>
 
-    <div class="competency-section bx--tile">
+    <div class="competency-section">
       <div class="section-title">Penilaian Kompetensi</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;align-items:center">
         <div id="comp-bars"></div>
@@ -330,8 +328,8 @@
       </div>
     </div>
 
-    <div class="assessment-box bx--tile">
-      <h3 class="section-title">Analisis Strategi</h3>
+    <div class="assessment-box">
+      <h3>Analisis Strategi</h3>
       <div id="strengths-list"></div>
       <div class="divider"></div>
       <div id="weaknesses-list"></div>
@@ -352,7 +350,7 @@
     <div class="overall-score" id="final-score">0</div>
     <div class="grade-label" id="grade-label"></div>
 
-    <div class="competency-section bx--tile">
+    <div class="competency-section">
       <div class="section-title">Profil Kompetensi</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;align-items:center">
         <div id="final-comp-bars"></div>
@@ -362,9 +360,9 @@
       </div>
     </div>
 
-    <div class="assessment-box bx--tile" id="final-assessment"></div>
+    <div class="assessment-box" id="final-assessment"></div>
     <div style="text-align:center;margin-top:24px">
-      <button class="btn btn-primary btn-lg bx--btn bx--btn--primary" onclick="restartGame()">Main Lagi</button>
+      <button class="btn btn-primary btn-lg" onclick="restartGame()">Main Lagi</button>
     </div>
   </div>
 </div>
