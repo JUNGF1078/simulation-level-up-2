@@ -1,980 +1,1242 @@
 'use strict';
-// ═══════════════════════════════════════════════
-// CONFIGURATION
-// ═══════════════════════════════════════════════
-const ALL_FASILITAS = [
-  "Area Parkir","Kantin","Ruang Ganti","Ruang VIP","Area Pers",
-  "Studio Siaran","Klinik Medis","Zona Sponsor","Area Fan",
-  "Toko Merchandise","Museum Mini","Area Hiburan"
-];
-
+// ══════════════════════════════════════════════════════
+// CONFIGURATION – Phase 3
+// ══════════════════════════════════════════════════════
 const C = {
-  rounds:[
-    {id:1, name:"Festival Olahraga Daerah",
-     desc:"Rencanakan event olahraga skala daerah. Pilih venue dan cabor yang sesuai kapasitas dan anggaran.",
-     budget:2000, minCabor:4, maxCabor:7, minProfit:null, crises:[],
-     obj:["Raih profit positif","Penuhi semua constraint operasional","Pilih 4–7 cabang olahraga"]},
-    {id:2, name:"Kejuaraan Regional",
-     desc:"Selenggarakan babak kualifikasi regional dengan anggaran lebih ketat. Ada peringatan pemadaman listrik daerah.",
-     budget:1800, minCabor:6, maxCabor:10, minProfit:null,
-     crises:["power_reduction"],
-     obj:["Raih profit positif","Pilih 6–10 cabang olahraga","Kelola penurunan kapasitas listrik (−20% kVA)"]},
-    {id:3, name:"Pekan Olahraga Nasional",
-     desc:"Selenggarakan event nasional di tengah tekanan anggaran. Inflasi dan krisis tenaga kerja meningkatkan biaya.",
-     budget:1500, minCabor:8, maxCabor:14, minProfit:100,
-     crises:["cost_inflation","staff_shortage"],
-     obj:["Raih profit ≥ 100M","Pilih 8–14 cabang olahraga","Kelola inflasi biaya 15%","Kelola kenaikan biaya staf 20%"]}
+  budget: 3000,
+
+  venues: {
+    v1:{id:'v1',name:"Stadion Bumi Pertiwi",sub:"Outdoor",cost:650,kW:1200,toilets:80,bc:false,maxOff:null,
+        r:{cabor:0.88,off:1.20,rev:0.95},
+        compat:['sepakBola','atletik','tenisDan','panahan','panjatTebing','maraton'],
+        desc:"Outdoor stadium besar. Kapasitas offline tertinggi (1.20×). Tidak ada broadcasting bawaan.",
+        warn:"❌ Tidak ada broadcasting — beli Paket BC (+Rp 80jt) untuk penonton online.",
+        trade:"✅ Offline ratio terbesar (1.20×) | ✅ 6 cabor outdoor | ❌ Tidak ada BC | ❌ Listrik terbatas 1.200 kW"},
+    v2:{id:'v2',name:"GOR Metropolitan",sub:"Indoor",cost:420,kW:3200,toilets:55,bc:true,maxOff:8000,
+        r:{cabor:0.95,off:0.90,rev:1.10},
+        compat:['buluTangkis','bolaVoli','basket','futsal','tenisMeja','pencakSilat','tinju','taekwondo','eSport'],
+        desc:"Indoor GOR. Broadcasting built-in. Hard cap 8.000 penonton offline!",
+        warn:"⚠️ Hard cap 8.000 pax — penonton melebihi batas tidak masuk, revenue terpotong.",
+        trade:"✅ Broadcasting built-in | ✅ Rev/pax tinggi (1.10×) | ✅ 9 cabor indoor | ❌ Hard cap 8.000 pax"},
+    v3:{id:'v3',name:"Lapangan Terbuka",sub:"Outdoor",cost:150,kW:1000,toilets:10,bc:false,maxOff:null,
+        r:{cabor:1.20,off:1.60,rev:0.70},
+        compat:['sepakBola','tenisDan','panahan','maraton','futsal'],
+        desc:"Venue termurah. Hanya 5 cabor kompatibel — tepat minimum! Rentan Event Card Cuaca.",
+        warn:"⚠️ Rentan Cuaca (-40% poff). Listrik 1.000 kW paling kecil. Toilet hanya 10 unit.",
+        trade:"✅ Sewa termurah (Rp 150jt) | ✅ Rasio offline 1.60× | ❌ Hanya 5 cabor | ❌ Listrik & toilet minim"},
+    v4:{id:'v4',name:"Sport Hall Elite",sub:"Indoor Premium",cost:880,kW:3800,toilets:40,bc:true,maxOff:null,
+        r:{cabor:0.82,off:0.70,rev:1.45},
+        compat:['buluTangkis','bolaVoli','basket','futsal','tenisMeja','pencakSilat','tinju','taekwondo','eSport'],
+        desc:"Premium venue. Biaya sewa tertinggi tapi rev/pax terbaik (1.45×) dan cabor termurah (0.82×).",
+        warn:"⚠️ Sewa Rp 880jt = ~29% budget. Rasio offline paling kecil (0.70×) — sedikit penonton.",
+        trade:"✅ Rev/pax tertinggi (1.45×) | ✅ Biaya cabor termurah (0.82×) | ❌ Sewa tertinggi | ❌ Offline 0.70×"},
+    v5:{id:'v5',name:"Kompleks Olahraga Nusantara",sub:"Mixed",cost:560,kW:4200,toilets:70,bc:true,maxOff:null,
+        r:{cabor:1.05,off:1.05,rev:1.00},
+        compat:['sepakBola','renang','tenisDan','panahan','panjatTebing','maraton','buluTangkis','bolaVoli','basket','futsal','tenisMeja','pencakSilat','tinju','taekwondo','eSport'],
+        desc:"Paling fleksibel — 15 dari 16 cabor kompatibel. Satu-satunya dengan kolam renang.",
+        warn:"⚠️ Biaya cabor tertinggi (1.05×). Atletik TIDAK kompatibel — tidak ada trek 400m oval.",
+        trade:"✅ 15 cabor kompatibel | ✅ Broadcasting + kolam renang | ❌ Biaya cabor 1.05× | ❌ Atletik tidak bisa"},
+  },
+
+  cabor:[
+    {id:'sepakBola',   e:'⚽',name:"Sepak Bola",       g:"Outdoor Lapangan", biaya:180,kW:250, pBase:6000,tiket:75, oBase:40000, compat:['v1','v3','v5'],es:false},
+    {id:'atletik',     e:'🏃',name:"Atletik",           g:"Outdoor Lintasan", biaya:120,kW:200, pBase:4000,tiket:50, oBase:30000, compat:['v1'],          es:false},
+    {id:'renang',      e:'🏊',name:"Renang",             g:"Akuatik",          biaya:150,kW:450, pBase:2000,tiket:60, oBase:20000, compat:['v5'],          es:false},
+    {id:'tenisDan',    e:'🎾',name:"Tenis Lapangan",    g:"Outdoor Court",    biaya:70, kW:230, pBase:1200,tiket:65, oBase:10000, compat:['v1','v3','v5'],es:false},
+    {id:'panahan',     e:'🏹',name:"Panahan",            g:"Outdoor Target",   biaya:45, kW:150, pBase:700, tiket:40, oBase:8000,  compat:['v1','v3','v5'],es:false},
+    {id:'panjatTebing',e:'🧗',name:"Panjat Tebing",     g:"Outdoor Wall",     biaya:65, kW:180, pBase:1200,tiket:55, oBase:14000, compat:['v1','v5'],     es:false},
+    {id:'maraton',     e:'🏃',name:"Maraton",            g:"Outdoor Rute",     biaya:90, kW:0,   pBase:8000,tiket:30, oBase:35000, compat:['v1','v3','v5'],es:false},
+    {id:'buluTangkis', e:'🏸',name:"Bulu Tangkis",      g:"Indoor Court",     biaya:85, kW:360, pBase:2000,tiket:55, oBase:28000, compat:['v2','v4','v5'],es:false},
+    {id:'bolaVoli',    e:'🏐',name:"Bola Voli",          g:"Indoor Court",     biaya:90, kW:380, pBase:2500,tiket:50, oBase:18000, compat:['v2','v4','v5'],es:false},
+    {id:'basket',      e:'🏀',name:"Basket",             g:"Indoor Court",     biaya:100,kW:420, pBase:3000,tiket:60, oBase:22000, compat:['v2','v4','v5'],es:false},
+    {id:'futsal',      e:'⚽',name:"Futsal",             g:"Indoor/Outdoor",   biaya:75, kW:330, pBase:1800,tiket:45, oBase:15000, compat:['v2','v3','v4','v5'],es:false},
+    {id:'tenisMeja',   e:'🏓',name:"Tenis Meja",         g:"Indoor Table",     biaya:50, kW:180, pBase:800, tiket:30, oBase:8000,  compat:['v2','v4','v5'],es:false},
+    {id:'pencakSilat', e:'🥋',name:"Pencak Silat",       g:"Beladiri Matras",  biaya:55, kW:210, pBase:1000,tiket:40, oBase:12000, compat:['v2','v4','v5'],es:false},
+    {id:'tinju',       e:'🥊',name:"Tinju",              g:"Ring Tinju",       biaya:70, kW:240, pBase:2400,tiket:55, oBase:18000, compat:['v2','v4','v5'],es:false},
+    {id:'taekwondo',   e:'🥋',name:"Taekwondo",          g:"Beladiri Matras",  biaya:60, kW:220, pBase:1200,tiket:45, oBase:10000, compat:['v2','v4','v5'],es:false},
+    {id:'eSport',      e:'🎮',name:"E-Sport Demo",       g:"Digital Gaming",   biaya:60, kW:800, pBase:500, tiket:30, oBase:80000, compat:['v2','v4','v5'],es:true},
   ],
 
-  // ── VENUES (specific named facilities) ──
-  venues:{
-    gorPratama:{
-      name:"GOR Remaja Pratama",
-      desc:"Gedung olahraga serbaguna skala kecamatan. Cocok untuk cabor indoor ringan.",
-      biayaSewa:8,
-      kapasitasPengunjung:800,
-      kapasitasListrik:60,
-      jumlahToilet:4,
-      fasilitasOnlineBroadcasting:false,
-      fasilitasArea:["Area Parkir","Kantin","Ruang Ganti"],
-      ratioBiayaCabor:0.80,
-      ratioOffline:0.75,
-      ratioPendapatan:0.80,
-      caborTersedia:['badminton','voli','pencakSilat','senam','angkatBesi']
-    },
-    gorUtama:{
-      name:"GOR Utama Kodam",
-      desc:"Arena indoor berstandar kabupaten dengan fasilitas tribun dan ruang VIP.",
-      biayaSewa:22,
-      kapasitasPengunjung:3500,
-      kapasitasListrik:180,
-      jumlahToilet:12,
-      fasilitasOnlineBroadcasting:false,
-      fasilitasArea:["Area Parkir","Kantin","Ruang Ganti","Ruang VIP","Area Pers"],
-      ratioBiayaCabor:0.95,
-      ratioOffline:0.92,
-      ratioPendapatan:0.98,
-      caborTersedia:['badminton','basket','voli','tinju','pencakSilat','senam','angkatBesi']
-    },
-    pusatAkuatik:{
-      name:"Pusat Akuatik Senayan",
-      desc:"Fasilitas akuatik berstandar internasional dengan kolam olimpik dan fasilitas siaran.",
-      biayaSewa:35,
-      kapasitasPengunjung:2500,
-      kapasitasListrik:120,
-      jumlahToilet:15,
-      fasilitasOnlineBroadcasting:true,
-      fasilitasArea:["Area Parkir","Kantin","Ruang Ganti","Ruang VIP","Studio Siaran","Klinik Medis"],
-      ratioBiayaCabor:1.10,
-      ratioOffline:0.90,
-      ratioPendapatan:1.15,
-      caborTersedia:['renang']
-    },
-    komplekRagunan:{
-      name:"Komplek Olahraga Ragunan",
-      desc:"Kompleks multi-venue outdoor dengan lapangan, lintasan, dan arena terbuka.",
-      biayaSewa:65,
-      kapasitasPengunjung:12000,
-      kapasitasListrik:600,
-      jumlahToilet:60,
-      fasilitasOnlineBroadcasting:true,
-      fasilitasArea:["Area Parkir","Kantin","Ruang Ganti","Ruang VIP","Area Pers","Studio Siaran","Klinik Medis","Zona Sponsor","Area Fan"],
-      ratioBiayaCabor:1.05,
-      ratioOffline:1.10,
-      ratioPendapatan:1.15,
-      caborTersedia:['sepakBola','atletik','tenis','panahan','balapSepeda','voli']
-    },
-    geloraNusantara:{
-      name:"Stadion Gelora Nusantara",
-      desc:"Stadion utama berstandar nasional dengan kapasitas besar dan fasilitas lengkap.",
-      biayaSewa:180,
-      kapasitasPengunjung:40000,
-      kapasitasListrik:1800,
-      jumlahToilet:200,
-      fasilitasOnlineBroadcasting:true,
-      fasilitasArea:["Area Parkir","Kantin","Ruang Ganti","Ruang VIP","Area Pers","Studio Siaran","Klinik Medis","Zona Sponsor","Area Fan","Toko Merchandise","Museum Mini","Area Hiburan"],
-      ratioBiayaCabor:1.20,
-      ratioOffline:1.30,
-      ratioPendapatan:1.35,
-      caborTersedia:['sepakBola','atletik','basket','tenis','badminton','tinju','balapSepeda','esport','panahan']
-    }
-  },
+  sponsorTiers:[
+    {max:30000,    rev:0,    label:"< 30K viewers",   tier:"—"},
+    {max:80000,    rev:150,  label:"30K – 80K",       tier:"Tier 1"},
+    {max:200000,   rev:300,  label:"80K – 200K",      tier:"Tier 2"},
+    {max:500000,   rev:600,  label:"200K – 500K",     tier:"Tier 3"},
+    {max:Infinity, rev:1000, label:"> 500K",          tier:"Tier 4"},
+  ],
 
-  // ── CABOR (specific named sports) ──
-  cabor:{
-    sepakBola:   {name:"Sepak Bola",    kelompok:"Outdoor",biayaPelaksanaan:80, kebutuhanListrik:150,penontonOffline:8000, hargaTiket:0.10,penontonOnline:80000},
-    basket:      {name:"Bola Basket",   kelompok:"Indoor", biayaPelaksanaan:45, kebutuhanListrik:80, penontonOffline:3000, hargaTiket:0.08,penontonOnline:30000},
-    tenis:       {name:"Tenis",         kelompok:"Outdoor",biayaPelaksanaan:30, kebutuhanListrik:50, penontonOffline:2000, hargaTiket:0.07,penontonOnline:20000},
-    badminton:   {name:"Bulu Tangkis",  kelompok:"Indoor", biayaPelaksanaan:25, kebutuhanListrik:60, penontonOffline:2500, hargaTiket:0.06,penontonOnline:25000},
-    renang:      {name:"Renang",        kelompok:"Indoor", biayaPelaksanaan:35, kebutuhanListrik:100,penontonOffline:1500, hargaTiket:0.06,penontonOnline:15000},
-    atletik:     {name:"Atletik",       kelompok:"Outdoor",biayaPelaksanaan:50, kebutuhanListrik:80, penontonOffline:5000, hargaTiket:0.05,penontonOnline:40000},
-    voli:        {name:"Bola Voli",     kelompok:"Indoor", biayaPelaksanaan:20, kebutuhanListrik:50, penontonOffline:2000, hargaTiket:0.05,penontonOnline:20000},
-    tinju:       {name:"Tinju",         kelompok:"Indoor", biayaPelaksanaan:50, kebutuhanListrik:70, penontonOffline:3500, hargaTiket:0.09,penontonOnline:50000},
-    senam:       {name:"Senam Artistik",kelompok:"Indoor", biayaPelaksanaan:20, kebutuhanListrik:40, penontonOffline:1500, hargaTiket:0.05,penontonOnline:15000},
-    pencakSilat: {name:"Pencak Silat",  kelompok:"Indoor", biayaPelaksanaan:15, kebutuhanListrik:30, penontonOffline:1200, hargaTiket:0.04,penontonOnline:12000},
-    panahan:     {name:"Panahan",       kelompok:"Outdoor",biayaPelaksanaan:20, kebutuhanListrik:40, penontonOffline:1000, hargaTiket:0.04,penontonOnline:10000},
-    angkatBesi:  {name:"Angkat Besi",   kelompok:"Indoor", biayaPelaksanaan:25, kebutuhanListrik:50, penontonOffline:1500, hargaTiket:0.05,penontonOnline:15000},
-    balapSepeda: {name:"Balap Sepeda",  kelompok:"Outdoor",biayaPelaksanaan:60, kebutuhanListrik:100,penontonOffline:5000, hargaTiket:0.07,penontonOnline:40000},
-    esport:      {name:"E-Sport",       kelompok:"Indoor", biayaPelaksanaan:40, kebutuhanListrik:150,penontonOffline:2000, hargaTiket:0.06,penontonOnline:100000}
-  },
-
-  sponsor:{base:30, perKOffline:50, perTKOnline:10},
-  staffCost:0.8,
-  staffPerVisitor:50,
-  toiletPerVisitor:80,
-  generatorKva:200,
-  generatorCost:20,
-  broadcastUpgradeCost:40,
-  backupInternetCost:15
+  eventCards:[
+    {id:'C01',e:'🌧️',color:'#1e3a8a',name:"Hujan Lebat",
+     desc:"Penonton OUTDOOR turun 40% — venue V1 dan V3 terkena dampak (poff ×0.60).",
+     hint:"Revenue tiket turun signifikan. Apakah toilet & security masih over-allocated?",
+     adapt:"Jangan panik menambah toilet/security. Penonton justru berkurang.",
+     targets:["Tidak menambah toilet (penonton turun, bukan naik)","Tidak menambah security (penonton turun)"]},
+    {id:'S01',e:'💸',color:'#5b21b6',name:"Sponsor Mundur",
+     desc:"Tier sponsorship turun 1 level. Revenue sponsor berkurang otomatis.",
+     hint:"Kompensasi dengan naikkan viewers (MSA/Streaming) ATAU kurangi total biaya.",
+     adapt:"Tingkatkan penonton online ATAU potong cost untuk adaptasi.",
+     targets:["Naikkan viewers (tambah MSA / Streaming Upgrade)","ATAU kurangi total biaya"]},
+    {id:'L01',e:'⚡',color:'#991b1b',name:"Krisis Generator",
+     desc:"Harga generator ×1.60 (Kecil: Rp 32jt, Besar: Rp 56jt). Maks 2 unit total.",
+     hint:"JANGAN panik beli genset tanpa cek deficit kW! Verifikasi dulu apakah perlu.",
+     adapt:"Cek: apakah kW digunakan masih di bawah kapasitas venue? Jika tidak defisit — jangan beli!",
+     targets:["Verifikasi deficit kW sebelum membeli genset","Tidak beli genset jika tidak ada deficit (tidak over-react)"]},
+    {id:'A01',e:'🎤',color:'#92400e',name:"Artis Viral",
+     desc:"Modifier Opening berubah: ×1.10 → ×1.30. Penonton offline naik signifikan (jika Opening dibeli).",
+     hint:"Jika Opening aktif, penonton naik 30% bukan 10% — toilet dan security harus diupdate!",
+     adapt:"Hitung ulang kebutuhan toilet & security berdasarkan poff yang lebih tinggi.",
+     targets:["Tambah toilet sesuai poff baru (lebih tinggi)","Tambah security sesuai poff baru"]},
+    {id:'K01',e:'📈',color:'#064e3b',name:"Kuota Bertambah",
+     desc:"poff +10%, penonton online +20%, biaya cabor +5% (otomatis).",
+     hint:"Lebih banyak penonton → cek toilet & security. Listrik tidak berubah (aman).",
+     adapt:"Hitung ulang toilet & security. Listrik tidak perlu diubah.",
+     targets:["Tambah toilet sesuai poff baru","Tambah security sesuai poff baru"]},
+  ],
 };
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════
-const DEFAULT_DECISIONS = ()=>({
-  days:3,
-  selectedVenues:['gorUtama'],
-  selectedCabor:['badminton','basket','voli','pencakSilat'],
-  foodstalls:5, foodtrucks:3, extraToilets:0, seating:5,
-  generators:0, broadcastUpgrade:false, backupInternet:false,
-  marketing:'medium', staff:100
+// ══════════════════════════════════════════════════════
+const makeDecisions = () => ({
+  venue:null, cabor:[],
+  bc:false, streaming:false, opening:false, closing:false,
+  gensetKecil:0, gensetBesar:0,
+  toilet5:0, toilet10:0,
+  security:0, medis:false,
+  foodStall:0, foodTruck:0, boothSponsor:0, msa:false,
 });
 
 let G = {
-  round:0, history:[], allResults:null,
-  decisions: DEFAULT_DECISIONS()
+  phase:1, eventCard:null,
+  startTime:null, p1time:0,
+  p1d:makeDecisions(), p2d:makeDecisions(),
+  p1r:null, p2r:null,
+  p1s:null, p2s:null,
 };
 
-const activeOpts = {marketing:'medium'};
+let currentTab = 'venue';
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════════════
-function getAvailableCabor(){
-  const available = new Set();
-  G.decisions.selectedVenues.forEach(vKey=>{
-    C.venues[vKey].caborTersedia.forEach(c=>available.add(c));
-  });
-  return available;
-}
+// ══════════════════════════════════════════════════════
+const fmt  = (n,d=0) => Number(n).toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtM = n => (n>=0?'+':'')+fmt(Math.round(n))+'M';
+const D    = () => G.phase===1 ? G.p1d : G.p2d;
+const V    = () => D().venue ? C.venues[D().venue] : null;
+const clamp= (v,a,b) => Math.min(b,Math.max(a,v));
 
-// ═══════════════════════════════════════════════
-// CALCULATION ENGINE
-// ═══════════════════════════════════════════════
-function calc(d, roundCfg) {
-  const crisis = roundCfg ? roundCfg.crises : [];
-  const powerReduction = crisis.includes('power_reduction') ? 0.80 : 1.0;
-  const costInflation  = crisis.includes('cost_inflation')  ? 1.15 : 1.0;
-  const staffInflation = crisis.includes('staff_shortage')  ? 1.20 : 1.0;
-
-  // ── VENUES ──
-  let venueCap=0, venuePower=0, venueCostBase=0, venueToilets=0, hasBroadcasting=false;
-  let sumRatioCabor=0, sumRatioOffline=0, sumRatioPendapatan=0;
-  const nVenues = Math.max(d.selectedVenues.length, 1);
-
-  d.selectedVenues.forEach(vKey=>{
-    const v = C.venues[vKey];
-    venueCap          += v.kapasitasPengunjung;
-    venuePower        += Math.round(v.kapasitasListrik * powerReduction);
-    venueCostBase     += v.biayaSewa;
-    venueToilets      += v.jumlahToilet;
-    if(v.fasilitasOnlineBroadcasting) hasBroadcasting = true;
-    sumRatioCabor     += v.ratioBiayaCabor;
-    sumRatioOffline   += v.ratioOffline;
-    sumRatioPendapatan+= v.ratioPendapatan;
-  });
-
-  const venueCost          = Math.round(venueCostBase * d.days * costInflation);
-  const avgRatioCabor      = sumRatioCabor      / nVenues;
-  const avgRatioOffline    = sumRatioOffline    / nVenues;
-  const avgRatioPendapatan = sumRatioPendapatan / nVenues;
-  if(d.broadcastUpgrade) hasBroadcasting = true;
-
-  // ── CABOR ──
-  let sportsCost=0, rawOffline=0, rawOnline=0, powerDemand=0, ticketRevBase=0;
-  d.selectedCabor.forEach(cKey=>{
-    const cb = C.cabor[cKey];
-    sportsCost   += Math.round(cb.biayaPelaksanaan * avgRatioCabor * costInflation);
-    powerDemand  += cb.kebutuhanListrik;
-    const effOff  = cb.penontonOffline * avgRatioOffline;
-    rawOffline   += effOff;
-    rawOnline    += cb.penontonOnline;
-    ticketRevBase+= effOff * cb.hargaTiket;
-  });
-
-  const mktBonus = {low:0.05,medium:0.12,high:0.20}[d.marketing]||0.12;
-  const mktCost  = {low:20,medium:40,high:70}[d.marketing]||40;
-  rawOffline    *= (1 + mktBonus);
-  rawOnline     *= (1 + mktBonus);
-  ticketRevBase *= (1 + mktBonus);
-
-  const effectiveOffline = Math.min(Math.round(rawOffline), venueCap);
-  const capacityFill     = venueCap > 0 ? Math.min(rawOffline, venueCap) / Math.max(rawOffline,1) : 0;
-  const broadcastMult    = hasBroadcasting ? 1.30 : 0.40;
-  const onlineViewers    = Math.round(rawOnline * broadcastMult);
-
-  // ── POWER ──
-  const powerSupply = venuePower + d.generators * C.generatorKva;
-  const powerOK     = powerDemand <= powerSupply;
-
-  // ── SANITATION ──
-  const totalToilets   = venueToilets + d.extraToilets;
-  const toiletRequired = Math.ceil(effectiveOffline / C.toiletPerVisitor);
-  const toiletOK       = totalToilets >= toiletRequired;
-
-  // ── STAFF ──
-  const staffRequired = Math.ceil(effectiveOffline / C.staffPerVisitor);
-  const staffOK       = d.staff >= staffRequired;
-
-  // ── BRANCHES ──
-  const totalBranches = d.selectedCabor.length;
-  const branchOK      = totalBranches >= (roundCfg ? roundCfg.minCabor : 4);
-
-  // ── COSTS ──
-  const facilityCost = d.foodstalls*10 + d.foodtrucks*15 + d.extraToilets*1 + d.seating*5;
-  const addonCost    = d.generators*C.generatorCost +
-                       (d.broadcastUpgrade ? C.broadcastUpgradeCost : 0) +
-                       (d.backupInternet   ? C.backupInternetCost   : 0);
-  const staffCost    = Math.round(d.staff * C.staffCost * staffInflation);
-  const totalCost    = venueCost + sportsCost + facilityCost + addonCost + mktCost + staffCost;
-
-  const budget   = roundCfg ? roundCfg.budget : C.rounds[G.round].budget;
-  const budgetOK = totalCost <= budget;
-
-  // ── PENALTIES ──
-  let revenueMultiplier=1.0, sponsorMultiplier=1.0;
-  const penalties=[];
-  if(!powerOK)  { revenueMultiplier*=0.60; penalties.push({name:'Blackout',        desc:'Kegagalan listrik → −40% total pendapatan'}); }
-  if(!toiletOK) { sponsorMultiplier*=0.70; penalties.push({name:'Sanitasi Buruk',  desc:'Kekurangan toilet → −30% pendapatan sponsor'}); }
-  if(!staffOK)  { revenueMultiplier*=0.80; penalties.push({name:'Kekurangan Staf', desc:'Understaffed → −20% pendapatan'}); }
-
-  // ── REVENUE ──
-  const ticketRevenue  = Math.round(ticketRevBase * capacityFill * avgRatioPendapatan * revenueMultiplier);
-  const foodRevenue    = d.foodstalls*8 + d.foodtrucks*12;
-  const rawSponsor     = C.sponsor.base + (effectiveOffline/1000)*C.sponsor.perKOffline + (onlineViewers/10000)*C.sponsor.perTKOnline;
-  const sponsorRevenue = Math.round(rawSponsor * sponsorMultiplier * revenueMultiplier);
-  const totalRevenue   = ticketRevenue + foodRevenue + sponsorRevenue;
-  const profit         = totalRevenue - totalCost;
-
-  return {
-    venueCost, sportsCost, facilityCost, addonCost, mktCost, staffCost, totalCost,
-    ticketRevenue, foodRevenue, sponsorRevenue, totalRevenue,
-    profit, effectiveOffline, onlineViewers,
-    venueCap, venuePower, powerDemand, powerSupply,
-    venueToilets, totalToilets, totalBranches,
-    capacityFillPct: Math.round(capacityFill * 100),
-    hasBroadcasting,
-    constraints:{
-      power:  {ok:powerOK,  required:powerDemand,  available:powerSupply},
-      toilet: {ok:toiletOK, required:toiletRequired,have:totalToilets},
-      staff:  {ok:staffOK,  required:staffRequired, have:d.staff},
-      budget: {ok:budgetOK, limit:budget,           cost:totalCost},
-      branches:{ok:branchOK,required:roundCfg?.minCabor||4,have:totalBranches}
-    },
-    penalties, budget
-  };
-}
-
-// ═══════════════════════════════════════════════
-// SCORING
-// ═══════════════════════════════════════════════
-function score(d, res, roundCfg) {
-  const c = res.constraints;
-  const profitRatio     = res.profit / res.budget;
-  const profitScore     = Math.max(0, Math.min(100, Math.round((profitRatio + 0.2) / 0.6 * 100)));
-  const cPass           = [c.power.ok,c.toilet.ok,c.staff.ok,c.budget.ok,c.branches.ok].filter(Boolean).length;
-  const complianceScore = Math.round(cPass / 5 * 100);
-  const effRatio        = res.totalCost > 0 ? res.totalRevenue / res.totalCost : 0;
-  const effScore        = Math.max(0, Math.min(100, Math.round((effRatio - 0.6) / 0.8 * 100)));
-  let riskScore = 100;
-  if(!c.power.ok)  riskScore -= 35;
-  if(!c.toilet.ok) riskScore -= 20;
-  if(!c.staff.ok)  riskScore -= 20;
-  if(!res.hasBroadcasting && !d.backupInternet) riskScore -= 15;
-  if(res.powerDemand > res.powerSupply * 0.95)  riskScore -= 10;
-  riskScore = Math.max(0, riskScore);
-  const total = Math.round(profitScore*0.35 + complianceScore*0.30 + effScore*0.20 + riskScore*0.15);
-  return {profitScore, complianceScore, effScore, riskScore, total};
-}
-
-function assessCompetencies(d, res) {
-  const c = res.constraints;
-
-  let analytic = 0;
-  if(c.power.ok) analytic += 25;
-  const tExcess = (c.toilet.have - c.toilet.required) / Math.max(c.toilet.required,1);
-  if(c.toilet.ok && tExcess < 0.5) analytic += 25; else if(c.toilet.ok) analytic += 10;
-  const sExcess = (c.staff.have - c.staff.required) / Math.max(c.staff.required,1);
-  if(c.staff.ok && sExcess < 0.5) analytic += 25; else if(c.staff.ok) analytic += 10;
-  const budgetUtil = res.totalCost / res.budget;
-  if(budgetUtil >= 0.5 && budgetUtil <= 0.95) analytic += 25; else if(budgetUtil > 0) analytic += 10;
-
-  let strategic = 0;
-  const highRevCabor = d.selectedCabor.filter(k=>C.cabor[k].hargaTiket >= 0.08).length;
-  if(highRevCabor >= 2) strategic += 25;
-  if(res.hasBroadcasting) strategic += 25;
-  if(res.profit > 0) strategic += 25;
-  if(res.capacityFillPct > 50) strategic += 25;
-
-  let risk = 0;
-  if(res.powerDemand <= res.powerSupply * 0.90) risk += 25;
-  if(c.toilet.ok) risk += 25;
-  if(c.staff.ok)  risk += 25;
-  if(d.backupInternet || !res.hasBroadcasting) risk += 25;
-
-  let prioritize = 0;
-  if(c.branches.ok) prioritize += 25;
-  if(Math.abs(sExcess) < 0.3) prioritize += 25; else prioritize += 10;
-  if(res.foodRevenue > 0) prioritize += 25;
-  if(d.marketing !== 'low' || res.effectiveOffline < 2000) prioritize += 25;
-
-  let tradeoff = 0;
-  if(res.profit / Math.max(res.totalRevenue,1) > 0.05) tradeoff += 25;
-  if(res.totalRevenue / Math.max(res.totalCost,1) > 1.1) tradeoff += 25;
-  if(res.venueCost < res.totalCost * 0.45) tradeoff += 25;
-  if(res.capacityFillPct > 40 && res.capacityFillPct <= 100) tradeoff += 25;
-
-  return {
-    analytic:   Math.min(100, analytic),
-    strategic:  Math.min(100, strategic),
-    risk:       Math.min(100, risk),
-    prioritize: Math.min(100, prioritize),
-    tradeoff:   Math.min(100, tradeoff)
-  };
-}
-
-function buildAssessment(d, res, comp) {
-  const strengths=[], weaknesses=[];
-  if(comp.analytic  >= 75) strengths.push('Analisis ketat — constraint dikelola dengan presisi dan efisiensi tinggi.');
-  else weaknesses.push('Manajemen constraint perlu ditingkatkan — review alokasi listrik, staf, dan sanitasi.');
-  if(comp.strategic >= 75) strengths.push('Visi strategis jelas — maksimisasi audiens dan diversifikasi pendapatan tercapai.');
-  else weaknesses.push('Pilihan strategis meninggalkan potensi pendapatan — pertimbangkan cabor dengan tiket lebih tinggi.');
-  if(comp.risk      >= 75) strengths.push('Manajemen risiko efektif — sistem cadangan dan infrastruktur listrik terjaga.');
-  else weaknesses.push('Eksposur risiko tinggi — tambah generator, backup internet, atau upgrade venue.');
-  if(comp.prioritize>= 75) strengths.push('Prioritisasi sumber daya sangat baik — anggaran dialokasikan ke area dampak tertinggi.');
-  else weaknesses.push('Gap prioritisasi teridentifikasi — hindari over-staffing atau under-investasi pada pendapatan utama.');
-  if(comp.tradeoff  >= 75) strengths.push('Analisis trade-off matang — keseimbangan venue, cabor, dan fasilitas tercapai.');
-  else weaknesses.push('Keseimbangan trade-off perlu penyempurnaan — biaya venue atau utilisasi kapasitas kurang optimal.');
-  if(res.profit < 0) weaknesses.push(`Event menghasilkan kerugian ${fmtM(res.profit)} — evaluasi asumsi pendapatan utama.`);
-  res.penalties.forEach(p=>weaknesses.push(`${p.name}: ${p.desc}`));
-  return {strengths, weaknesses};
-}
-
-// ═══════════════════════════════════════════════
-// FORMATTING
-// ═══════════════════════════════════════════════
-function fmt(n){return n==null?'—':n>=0?`+${n.toLocaleString()}`:`${n.toLocaleString()}`}
-function fmtM(n){return n==null?'—M':`${n.toLocaleString()}M`}
-function color(n){return n>0?'var(--accent)':n<0?'var(--danger)':'var(--muted)'}
-
-// ═══════════════════════════════════════════════
-// UI: SCREENS
-// ═══════════════════════════════════════════════
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const stepMap={briefing:0,planning:1,simulation:2,results:3,'final-report':4};
-  const si = stepMap[id] ?? -1;
+  updateSteps(id);
+}
+
+function updateSteps(screenId){
+  const map={briefing:0,planning:1,simulation:1,results:2,'event-card':3,final:4};
+  const idx = map[screenId]??0;
   document.querySelectorAll('.step').forEach((s,i)=>{
-    s.classList.toggle('done',   i < si);
-    s.classList.toggle('active', i === si);
+    s.classList.toggle('active',i===idx);
+    s.classList.toggle('done',i<idx);
   });
 }
 
-// ═══════════════════════════════════════════════
-// BRIEFING
-// ═══════════════════════════════════════════════
-function renderBriefing(){
-  const r = C.rounds[G.round];
-  document.getElementById('hdr-budget').textContent = r.budget.toLocaleString();
-
-  const crisisBox = document.getElementById('crisis-box');
-  if(r.crises.length){
-    crisisBox.style.display='block';
-    document.getElementById('crisis-items').innerHTML = r.crises.map(cr=>{
-      if(cr==='power_reduction') return '<div class="crisis-item">⚡ Peringatan Listrik: Kapasitas listrik venue berkurang 20%</div>';
-      if(cr==='cost_inflation')  return '<div class="crisis-item">📈 Inflasi Biaya: Semua biaya operasional naik 15%</div>';
-      if(cr==='staff_shortage')  return '<div class="crisis-item">👷 Kekurangan Tenaga Kerja: Biaya staf naik 20%</div>';
-      return '';
-    }).join('');
-  } else { crisisBox.style.display='none'; }
-
-  document.getElementById('briefing-info').innerHTML = `
-    <div class="info-card"><div class="label">Ronde</div><div class="value">${r.id} / 3</div><div class="unit">${r.name}</div></div>
-    <div class="info-card"><div class="label">Anggaran</div><div class="value text-primary">${r.budget.toLocaleString()}</div><div class="unit">Juta IDR</div></div>
-    <div class="info-card"><div class="label">Jumlah Cabor</div><div class="value">${r.minCabor}–${r.maxCabor}</div><div class="unit">Cabang olahraga</div></div>
-    <div class="info-card"><div class="label">Target Profit</div><div class="value ${r.minProfit?'text-warn':'text-accent'}">${r.minProfit?r.minProfit+'+':'Positif'}</div><div class="unit">${r.minProfit?'Minimum (M)':'Break even'}</div></div>
-  `;
-
-  document.getElementById('briefing-objectives').innerHTML = `
-    <h3>${r.name}</h3>
-    <p style="color:var(--muted);font-size:13px;margin:8px 0 16px">${r.desc}</p>
-    ${r.obj.map((o,i)=>`<div class="obj-item"><div class="obj-icon" style="background:rgba(14,165,233,.1);color:var(--primary)">${i+1}</div>${o}</div>`).join('')}
-  `;
-
-  document.getElementById('round-history').innerHTML = C.rounds.map((rd,i)=>{
-    const h = G.history[i];
-    const cls = h?'done':(i===G.round?'active':'');
-    return `<div class="round-card ${cls}">
-      <div class="r-num">Ronde ${rd.id}</div>
-      <div class="r-profit" style="color:${h?color(h.profit):'var(--muted)'}">${h?fmtM(h.profit):'—'}</div>
-      <div class="r-score">${h?`Skor: ${h.scores.total}`:'Belum dimainkan'}</div>
-    </div>`;
-  }).join('');
+function showToast(msg,dur=2800){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
 }
 
-// ═══════════════════════════════════════════════
-// PLANNING
-// ═══════════════════════════════════════════════
-function startPlanning(){
-  showScreen('planning');
-  const r = C.rounds[G.round];
-  document.getElementById('min-cabor-label').textContent = r.minCabor;
-  document.getElementById('max-cabor-label').textContent = r.maxCabor;
+function elapsedMin(){
+  if(!G.startTime) return 0;
+  return (Date.now()-G.startTime)/60000;
+}
 
-  const d = G.decisions;
-  const sliderMap = {
-    'rental-days':   [d.days,          'days-val'],
-    'foodstalls':    [d.foodstalls,     'stalls-val'],
-    'foodtrucks':    [d.foodtrucks,     'trucks-val'],
-    'extra-toilets': [d.extraToilets,   'extra-toilet-val'],
-    'seating':       [d.seating,        'seat-val'],
-    'generators':    [d.generators,     'gen-val'],
-    'staff':         [d.staff,          'staff-val']
+// ══════════════════════════════════════════════════════
+// SCORING HELPERS
+// ══════════════════════════════════════════════════════
+function rsRatio(ratio){
+  if(ratio<1.0) return 0;
+  if(ratio<=1.15) return 5;
+  if(ratio<=1.50) return 4;
+  return 2;
+}
+function rsListrik(deficit,genKW){
+  if(deficit===0){
+    if(genKW===0) return 5;
+    if(genKW<=300) return 3;
+    return 1;
+  }
+  if(genKW<deficit) return 0;
+  const surplus=genKW-deficit;
+  if(surplus<=200) return 5;
+  if(surplus<=500) return 3;
+  return 1;
+}
+function rsBudget(cost){
+  const sisa=(3000-cost)/3000;
+  if(sisa<=0.40) return 5;
+  if(sisa<=0.60) return 4;
+  return 2;
+}
+function rsFB(ratio,poff){
+  if(poff===0) return 0;
+  if(ratio>=0.85&&ratio<=1.20) return 5;
+  if((ratio>=0.70&&ratio<0.85)||(ratio>1.20&&ratio<=1.60)) return 4;
+  if((ratio>=0.50&&ratio<0.70)||(ratio>1.60&&ratio<=2.50)) return 2;
+  return 0;
+}
+
+// ══════════════════════════════════════════════════════
+// MAIN CALCULATION ENGINE
+// ══════════════════════════════════════════════════════
+function calc(d, ec){
+  if(!d.venue) return null;
+  const v = C.venues[d.venue];
+
+  // Broadcasting active?
+  const bcActive = v.bc || d.bc;
+
+  // Genset costs (L01 effect)
+  const gKCost = ec?.id==='L01' ? 32 : 20;
+  const gBCost = ec?.id==='L01' ? 56 : 35;
+
+  // kW from extras
+  let kWExtras = 0;
+  if(d.bc)       kWExtras += 200;
+  if(d.streaming) kWExtras += 80;
+  if(d.opening)  kWExtras += 150;
+  if(d.closing)  kWExtras += 100;
+
+  // kW from genset
+  const kWGenset = d.gensetKecil*300 + d.gensetBesar*700;
+
+  // Opening multiplier (A01 changes 1.10→1.30)
+  const openMult = d.opening ? (ec?.id==='A01' ? 1.30 : 1.10) : 1;
+  const closeMult = d.closing ? 1.08 : 1;
+
+  // C01 outdoor rain factor
+  const rainFactor = (ec?.id==='C01' && (d.venue==='v1'||d.venue==='v3')) ? 0.60 : 1;
+
+  // K01 factors
+  const k01poff = ec?.id==='K01' ? 1.10 : 1;
+  const k01pon  = ec?.id==='K01' ? 1.20 : 1;
+  const k01cost = ec?.id==='K01' ? 1.05 : 1;
+
+  // Per-cabor calculations
+  let kWCabor=0, costCabor=0;
+  let revTiketSum=0;  // poff × tiket sum (before cap / revPerPax)
+  let poffSum=0, ponSum=0;
+  const caborDetails=[];
+
+  for(const cId of d.cabor){
+    const c = C.cabor.find(x=>x.id===cId);
+    kWCabor += c.kW;
+    const biaya = c.biaya * v.r.cabor * k01cost;
+    costCabor += biaya;
+
+    const compat = c.compat.includes(d.venue) && !(c.es && !bcActive);
+    if(!compat){ caborDetails.push({id:cId,name:c.name,compat:false,poff:0,pon:0,rev:0}); continue; }
+
+    let poff = c.pBase * v.r.off * openMult * closeMult * rainFactor * k01poff;
+    let pon  = c.oBase * (d.streaming?1.2:1) * (d.msa?1.15:1) * k01pon;
+
+    revTiketSum += poff * c.tiket; // tiket in Rp ribu
+    poffSum += poff;
+    ponSum  += pon;
+    caborDetails.push({id:cId,name:c.name,e:c.e,compat:true,poff,pon,rev:poff*c.tiket});
+  }
+
+  const kWTotal = kWCabor + kWExtras;
+  const kWVenue = v.kW;
+  const kWAvail = kWVenue + kWGenset;
+  const kWDeficit = Math.max(0, kWTotal - kWVenue);
+  const blackout  = kWTotal > kWAvail;
+
+  // Blackout → no revenue
+  if(blackout){ poffSum=0; ponSum=0; revTiketSum=0; }
+
+  // V2 hard cap
+  if(d.venue==='v2' && poffSum>8000){
+    const scale = 8000/poffSum;
+    revTiketSum *= scale;
+    poffSum = 8000;
+  }
+
+  // Online only if broadcasting active
+  if(!bcActive) ponSum=0;
+
+  // Ticket revenue (Rp jt)
+  const revTiket = revTiketSum / 1000 * v.r.rev;
+
+  // Sponsor tier
+  const totalViewers = poffSum + ponSum;
+  let sponsorIdx=0;
+  for(let i=0;i<C.sponsorTiers.length;i++){
+    if(totalViewers<=C.sponsorTiers[i].max){ sponsorIdx=i; break; }
+    sponsorIdx=i;
+  }
+  // S01: tier down 1
+  if(ec?.id==='S01') sponsorIdx=Math.max(0,sponsorIdx-1);
+  const revSponsor = C.sponsorTiers[sponsorIdx].rev;
+
+  // F&B revenue (catchment system)
+  const revFoodStall = Math.min(d.foodStall, poffSum/800) * 15;
+  const revFoodTruck = Math.min(d.foodTruck, poffSum/1200) * 22;
+
+  // Booth sponsor (saturation)
+  const sat = (d.boothSponsor>0&&totalViewers>0)
+    ? Math.min(1, totalViewers/(d.boothSponsor*5000)) : 0;
+  const revBooth = d.boothSponsor*30*sat;
+
+  const totalRev = revTiket + revSponsor + revFoodStall + revFoodTruck + revBooth;
+
+  // Costs
+  const costVenue = v.cost;
+  let costExtras=0;
+  if(d.bc)        costExtras+=80;
+  if(d.streaming) costExtras+=45;
+  if(d.opening)   costExtras+=60;
+  if(d.closing)   costExtras+=50;
+  costExtras += d.gensetKecil*gKCost + d.gensetBesar*gBCost;
+  costExtras += d.toilet10*22 + d.toilet5*12;
+  costExtras += d.security*15;
+  if(d.medis) costExtras+=25;
+  costExtras += d.foodStall*8 + d.foodTruck*12 + d.boothSponsor*10;
+  if(d.msa) costExtras+=35;
+
+  const totalCost = costVenue + costCabor + costExtras;
+  const profit = totalRev - totalCost;
+  const margin = totalRev>0 ? profit/totalRev*100 : (profit>=0?0:-100);
+
+  // Constraints
+  const toiletsTotal   = v.toilets + d.toilet10*10 + d.toilet5*5;
+  const toiletsReq     = poffSum>0 ? Math.ceil(poffSum/100) : 0;
+  const securityTotal  = d.security*10;
+  const securityReq    = poffSum>0 ? Math.max(10,Math.ceil(poffSum/200)) : 10;
+  const nIncompat      = d.cabor.filter(id=>{
+    const c=C.cabor.find(x=>x.id===id);
+    return !c.compat.includes(d.venue)||(c.es&&!bcActive);
+  }).length;
+  const constraints = {
+    listrik:  !blackout,
+    toilet:   toiletsReq>0 ? toiletsTotal>=toiletsReq : true,
+    security: securityTotal>=securityReq,
+    cabor:    d.cabor.length>=5 && nIncompat===0,
+    medis:    d.medis,
+    budget:   totalCost<=3000,
   };
-  Object.entries(sliderMap).forEach(([id,[val,dispId]])=>{
-    const el=document.getElementById(id), dp=document.getElementById(dispId);
-    if(el) el.value=val; if(dp) dp.textContent=val;
-  });
-  document.getElementById('broadcast-upgrade').checked = d.broadcastUpgrade;
-  document.getElementById('backup-internet').checked   = d.backupInternet;
-  document.querySelectorAll('#marketing-group .opt').forEach(b=>{
-    b.classList.toggle('active', b.dataset.val === d.marketing);
-  });
-  activeOpts.marketing = d.marketing;
+  const nPass = Object.values(constraints).filter(Boolean).length;
 
-  renderVenueCards();
-  renderCaborTable();
+  // Resource Stewardship
+  const rs_toilet   = toiletsReq>0  ? rsRatio(toiletsTotal/toiletsReq)   : 5;
+  const rs_security = securityReq>0 ? rsRatio(securityTotal/securityReq) : 5;
+  const rs_listrik  = rsListrik(kWDeficit, kWGenset);
+  const rs_budget   = rsBudget(totalCost);
+  const catchRatio  = poffSum>0 ? (d.foodStall*800+d.foodTruck*1200)/poffSum : 0;
+  const rs_fb       = rsFB(catchRatio, poffSum);
+  const totalRS     = rs_toilet+rs_security+rs_listrik+rs_budget+rs_fb;
+
+  return {
+    kWCabor,kWExtras,kWTotal,kWVenue,kWAvail,kWGenset,kWDeficit,blackout,
+    poffSum,ponSum,totalViewers,sponsorIdx,
+    revTiket,revSponsor,revFoodStall,revFoodTruck,revBooth,totalRev,
+    costVenue,costCabor,costExtras,totalCost,
+    profit,margin,nPass,nIncompat,
+    toiletsTotal,toiletsReq,securityTotal,securityReq,
+    bcActive,constraints,caborDetails,
+    rs_toilet,rs_security,rs_listrik,rs_budget,rs_fb,totalRS,
+    catchRatio,sat,
+    gKCost,gBCost,
+  };
+}
+
+// ══════════════════════════════════════════════════════
+// SCORING
+// ══════════════════════════════════════════════════════
+function scorePhase(res, timeMin){
+  if(!res) return null;
+  const stLookup=[0,4,8,12,17,21,25];
+  const st = stLookup[clamp(res.nPass,0,6)];
+
+  const m=res.margin;
+  let sp=0;
+  if(m>=20)sp=25; else if(m>=10)sp=20; else if(m>=1)sp=15;
+  else if(m>=0)sp=10; else if(m>=-10)sp=5; else sp=0;
+
+  const rs = res.totalRS;
+
+  let ts=5;
+  if(timeMin<15)ts=25; else if(timeMin<20)ts=20;
+  else if(timeMin<25)ts=15; else if(timeMin<30)ts=10;
+  const dec = Math.round(ts*(res.nPass/6));
+
+  return {st,sp,rs,dec,total:st+sp+rs+dec,ts};
+}
+
+function calcLA(ec, p1d, p2d, p1r, p2r){
+  if(!ec||!p1r||!p2r) return {diag:0,eff:0,integ:0,total:0};
+  let diag=0;
+
+  const p1tlt = p1d.toilet5+p1d.toilet10;
+  const p2tlt = p2d.toilet5+p2d.toilet10;
+
+  switch(ec.id){
+    case 'C01':
+      if(p2tlt<=p1tlt) diag+=4;
+      if(p2d.security<=p1d.security) diag+=4;
+      break;
+    case 'S01':{
+      const viewUp = p2r.totalViewers>p1r.totalViewers;
+      const costDn = p2r.totalCost<p1r.totalCost;
+      if(viewUp) diag+=4;
+      if(costDn) diag+=4;
+      break;}
+    case 'L01':{
+      const def1=p1r.kWDeficit>0;
+      const buyG2=p2d.gensetKecil+p2d.gensetBesar>0;
+      if(!def1&&!buyG2) diag=8;
+      else if(!def1&&buyG2) diag=0;
+      else if(def1&&!p2r.blackout) diag=8;
+      else diag=0;
+      break;}
+    case 'A01':
+      if(p2r.toiletsTotal>=p2r.toiletsReq) diag+=4;
+      if(p2r.securityTotal>=p2r.securityReq) diag+=4;
+      break;
+    case 'K01':
+      if(p2r.toiletsTotal>=p2r.toiletsReq) diag+=4;
+      if(p2r.securityTotal>=p2r.securityReq) diag+=4;
+      break;
+  }
+  diag=Math.min(8,diag);
+
+  // Efficiency
+  const dRev=p2r.totalRev-p1r.totalRev;
+  const dCost=Math.max(0,p2r.totalCost-p1r.totalCost);
+  const net=dRev-dCost;
+  const pct=p1r.totalRev>0?net/p1r.totalRev*100:0;
+  let eff=0;
+  if(pct>8)eff=12; else if(pct>4)eff=10; else if(pct>0)eff=8;
+  else if(pct>-5)eff=5; else if(pct>-15)eff=2;
+
+  // Integrity
+  const dPass=p2r.nPass-p1r.nPass;
+  let integ=0;
+  if(dPass>=1)integ=5; else if(dPass===0)integ=3; else if(dPass===-1)integ=1;
+
+  return {diag,eff,integ,total:diag+eff+integ};
+}
+
+function scoreWithEC(p2res, timeMin, la){
+  if(!p2res) return null;
+  const raw=scorePhase(p2res,timeMin);
+  const sc80=v=>Math.round(v*0.8);
+  const laScaled=Math.round(la.total*0.8);
+  return {
+    st:sc80(raw.st), sp:sc80(raw.sp), rs:sc80(raw.rs), dec:sc80(raw.dec),
+    la:laScaled, total:sc80(raw.st)+sc80(raw.sp)+sc80(raw.rs)+sc80(raw.dec)+laScaled,
+    raw, la_detail:la,
+  };
+}
+
+// ══════════════════════════════════════════════════════
+// UI – BRIEFING
+// ══════════════════════════════════════════════════════
+function buildBriefing(){
+  document.getElementById('briefing-info').innerHTML=`
+    <div class="info-card"><div class="label">Budget Awal</div><div class="value">3.000</div><div class="unit">Rp Juta</div></div>
+    <div class="info-card"><div class="label">Durasi Sesi</div><div class="value">30</div><div class="unit">Menit</div></div>
+    <div class="info-card"><div class="label">Venue Pilihan</div><div class="value">5</div><div class="unit">V1 – V5</div></div>
+    <div class="info-card"><div class="label">Cabor Tersedia</div><div class="value">16</div><div class="unit">Min 5 pilih</div></div>
+    <div class="info-card"><div class="label">Fase</div><div class="value">2</div><div class="unit">Planning + Event Card</div></div>
+  `;
+  document.getElementById('briefing-objectives').innerHTML=`
+    <h3>Objektif</h3>
+    <div class="obj-item"><div class="obj-icon">💰</div>Raih profit positif (Total Revenue > Total Cost)</div>
+    <div class="obj-item"><div class="obj-icon">⚡</div>Jaga listrik: kW digunakan ≤ kapasitas venue + genset</div>
+    <div class="obj-item"><div class="obj-icon">🚽</div>Toilet ≥ 1 per 100 penonton offline aktual</div>
+    <div class="obj-item"><div class="obj-icon">🛡️</div>Security ≥ max(10, 1 per 200 penonton offline)</div>
+    <div class="obj-item"><div class="obj-icon">⚽</div>Pilih min. 5 cabor — semua harus kompatibel dengan venue</div>
+    <div class="obj-item"><div class="obj-icon">🏥</div>Tim Medis & P3K WAJIB dibeli (Rp 25jt)</div>
+    <div class="obj-item"><div class="obj-icon">🎴</div>Fase 2: Kartu Event ditarik secara acak — adaptasi keputusan Anda!</div>
+  `;
+}
+
+function startPlanning(){
+  G.phase=1;
+  G.p1d=makeDecisions();
+  G.startTime=Date.now();
+  currentTab='venue';
+  buildPlanning();
+  showScreen('planning');
+}
+
+// ══════════════════════════════════════════════════════
+// UI – PLANNING
+// ══════════════════════════════════════════════════════
+function buildPlanning(){
+  const isAdapt = G.phase===2;
+  const ec = G.eventCard;
+
+  // Update topbar budget pill
+  document.getElementById('hdr-budget').textContent='3.000';
+
+  // Event card banner (Phase 2)
+  const banner = document.getElementById('ec-banner');
+  if(isAdapt && ec){
+    banner.style.display='flex';
+    document.getElementById('ec-banner-name').textContent=ec.e+' '+ec.name;
+    document.getElementById('ec-banner-desc').textContent=ec.desc;
+    document.getElementById('ec-banner-adapt').textContent=ec.adapt;
+  } else {
+    banner.style.display='none';
+  }
+
+  // Venue tab locked in Phase 2
+  document.getElementById('tab-btn-venue').disabled=false;
+  renderVenueTab();
+  switchTab(isAdapt?'cabor':'venue');
   updatePreview();
 }
 
 function switchTab(name){
-  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  event.currentTarget.classList.add('active');
+  currentTab=name;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
+  // Render if needed
+  if(name==='cabor')     renderCaborTab();
+  if(name==='venue')     renderVenueTab();
+  if(name==='listrik')   renderListrikTab();
+  if(name==='addons')    renderAddonsTab();
+  if(name==='operasional') renderOpTab();
 }
 
-function selectOpt(btn, groupId, key){
-  document.querySelectorAll('#'+groupId+' .opt').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  activeOpts[key] = btn.dataset.val;
-  updatePreview();
-}
-
-function onSlider(input, valId){ document.getElementById(valId).textContent = input.value; }
-
-// ── VENUE CARDS ──
-function renderVenueCards(){
-  const sel = G.decisions.selectedVenues;
-  document.getElementById('venue-cards').innerHTML = Object.entries(C.venues).map(([key,v])=>{
-    const isSel  = sel.includes(key);
-    const canAdd = sel.length < 3 || isSel;
-    const caborNames = v.caborTersedia.map(k=>C.cabor[k]?.name||k);
-    return `
-    <div class="venue-card${isSel?' selected':''}${!canAdd?' vc-disabled':''}"
-         onclick="${canAdd?`toggleVenue('${key}')`:''}" >
+function renderVenueTab(){
+  const d=D(); const isAdapt=G.phase===2;
+  let html='';
+  for(const vk of Object.keys(C.venues)){
+    const v=C.venues[vk];
+    const sel=d.venue===vk;
+    const locked=isAdapt;
+    html+=`<div class="venue-card${sel?' selected':''}${locked&&!sel?' vc-disabled':''}" onclick="${locked?'':'selectVenue(\''+vk+'\')'}">
       <div class="vc-header">
-        <span class="vc-name">${v.name}</span>
-        <span class="vc-badge ${isSel?'sel':'unsel'}">${isSel?'✓ Dipilih':'+ Pilih'}</span>
+        <div class="vc-name">${v.name} <span class="tag tag-blue">${v.sub}</span>${locked&&sel?'<span class="tag tag-green" style="margin-left:4px">TERKUNCI</span>':''}</div>
+        <div class="vc-badge ${sel?'sel':'unsel'}">${sel?'✓ Dipilih':'Pilih'}</div>
       </div>
       <div class="vc-desc">${v.desc}</div>
       <div class="vc-attrs">
-        <div class="vc-row"><span>Biaya Sewa</span><span class="vc-val">${v.biayaSewa}M/hari</span></div>
-        <div class="vc-row"><span>Kapasitas Pengunjung</span><span class="vc-val">${v.kapasitasPengunjung.toLocaleString()} org</span></div>
-        <div class="vc-row"><span>Kapasitas Listrik</span><span class="vc-val">${v.kapasitasListrik} kVA</span></div>
-        <div class="vc-row"><span>Jumlah Toilet</span><span class="vc-val">${v.jumlahToilet} unit</span></div>
-        <div class="vc-row"><span>Fasilitas Online Broadcasting</span><span class="vc-val ${v.fasilitasOnlineBroadcasting?'pos':'neg'}">${v.fasilitasOnlineBroadcasting?'✓ Ya':'✗ Tidak'}</span></div>
-        <div class="vc-row"><span>Fasilitas Area</span><span class="vc-val">${v.fasilitasArea.length} / 12</span></div>
-        <div class="vc-row"><span>Rasio Biaya Pelaksanaan Cabor</span><span class="vc-val">${v.ratioBiayaCabor}×</span></div>
-        <div class="vc-row"><span>Rasio Pengunjung Offline</span><span class="vc-val">${v.ratioOffline}×</span></div>
-        <div class="vc-row"><span>Rasio Pendapatan per Pengunjung</span><span class="vc-val">${v.ratioPendapatan}×</span></div>
+        <div class="vc-row"><span>Sewa</span><span class="vc-val">Rp ${fmt(v.cost)} jt</span></div>
+        <div class="vc-row"><span>Listrik</span><span class="vc-val">${fmt(v.kW)} kW</span></div>
+        <div class="vc-row"><span>Toilet bawaan</span><span class="vc-val">${v.toilets} unit</span></div>
+        <div class="vc-row"><span>Broadcasting</span><span class="vc-val ${v.bc?'pos':'neg'}">${v.bc?'✅ Built-in':'❌ Tidak ada'}</span></div>
+        <div class="vc-row"><span>Max Offline</span><span class="vc-val">${v.maxOff?fmt(v.maxOff)+' pax':'Tidak ada cap'}</span></div>
+        <div class="vc-row"><span>Cabor compat</span><span class="vc-val text-accent">${v.compat.length} cabor</span></div>
+        <div class="vc-row"><span>Rasio biaya cabor</span><span class="vc-val">${v.r.cabor}×</span></div>
+        <div class="vc-row"><span>Rasio offline</span><span class="vc-val">${v.r.off}×</span></div>
+        <div class="vc-row"><span>Rasio rev/pax</span><span class="vc-val">${v.r.rev}×</span></div>
       </div>
-      <div class="vc-areas">
-        <div class="vc-areas-label">Fasilitas Area (${v.fasilitasArea.length}/12):</div>
-        <div class="area-tags">
-          ${ALL_FASILITAS.map(a=>`<span class="area-tag ${v.fasilitasArea.includes(a)?'have':'missing'}">${a}</span>`).join('')}
-        </div>
-      </div>
-      <div class="vc-cabor-wrap">
-        <div class="vc-areas-label">Cabor Tersedia (${v.caborTersedia.length}):</div>
-        <div class="area-tags">
-          ${caborNames.map(n=>`<span class="area-tag have">${n}</span>`).join('')}
-        </div>
-      </div>
+      <div class="vc-warn" style="font-size:11px;color:var(--warn);margin-top:6px;line-height:1.4">${v.warn}</div>
     </div>`;
-  }).join('');
-  document.getElementById('selected-venue-count').textContent = sel.length;
+  }
+  document.getElementById('venue-cards').innerHTML=html;
 }
 
-function toggleVenue(key){
-  const sel = G.decisions.selectedVenues;
-  const idx = sel.indexOf(key);
-  if(idx >= 0){
-    if(sel.length > 1){
-      sel.splice(idx, 1);
-      // Auto-remove cabor no longer available at remaining venues
-      const nowAvailable = getAvailableCabor();
-      const removed = G.decisions.selectedCabor.filter(c=>!nowAvailable.has(c));
-      G.decisions.selectedCabor = G.decisions.selectedCabor.filter(c=>nowAvailable.has(c));
-      if(removed.length){
-        const names = removed.map(k=>C.cabor[k]?.name||k).join(', ');
-        showToast(`⚠ Cabor dihapus otomatis (tidak tersedia di sisa venue): ${names}`,'warn');
-      }
-    }
-  } else {
-    if(sel.length < 3) sel.push(key);
-  }
-  renderVenueCards();
-  renderCaborTable();
+function selectVenue(id){
+  if(G.phase===2) return;
+  D().venue=id;
+  // Reset cabor to keep only compatible ones
+  const v=C.venues[id];
+  D().cabor=D().cabor.filter(cId=>C.cabor.find(x=>x.id===cId)?.compat.includes(id));
+  renderVenueTab();
+  renderCaborTab();
   updatePreview();
 }
 
-// ── CABOR TABLE ──
-function renderCaborTable(){
-  const sel       = G.decisions.selectedCabor;
-  const available = getAvailableCabor();
-  const r         = C.rounds[G.round];
+function renderCaborTab(){
+  const d=D(); const v=V();
+  let html='';
+  if(!v){
+    document.getElementById('cabor-list').innerHTML='<div style="color:var(--muted);padding:20px;text-align:center">Pilih venue terlebih dahulu.</div>';
+    return;
+  }
+  // Group by indoor/outdoor
+  const groups={};
+  C.cabor.forEach(c=>{
+    if(!groups[c.g]) groups[c.g]=[];
+    groups[c.g].push(c);
+  });
 
-  document.getElementById('cabor-rows').innerHTML = Object.entries(C.cabor).map(([key,cb])=>{
-    const isSel    = sel.includes(key);
-    const isAvail  = available.has(key);
-    const rowClass = isSel ? 'selected' : (!isAvail ? 'unavailable' : '');
-    return `<tr class="cabor-row ${rowClass}" onclick="${isAvail?`toggleCabor('${key}')`:''}" title="${!isAvail?'Tidak tersedia di venue yang dipilih':''}">
-      <td><div class="check-box${isSel?' checked':''}${!isAvail?' disabled':''}"></div></td>
-      <td><strong style="${!isAvail?'color:var(--muted)':''}">${cb.name}</strong>${!isAvail?'<span class="na-badge">tidak tersedia</span>':''}</td>
-      <td><span class="tag ${cb.kelompok==='Indoor'?'tag-blue':'tag-green'}" style="${!isAvail?'opacity:.4':''}">${cb.kelompok}</span></td>
-      <td style="${!isAvail?'color:var(--muted)':''}">${cb.biayaPelaksanaan}M</td>
-      <td style="${!isAvail?'color:var(--muted)':''}">${cb.kebutuhanListrik} kVA</td>
-      <td style="${!isAvail?'color:var(--muted)':''}">${cb.penontonOffline.toLocaleString()}</td>
-      <td style="${!isAvail?'color:var(--muted)':''}">${(cb.hargaTiket*1000).toFixed(0)}k</td>
-      <td style="${!isAvail?'color:var(--muted)':''}">${(cb.penontonOnline/1000).toFixed(0)}K</td>
+  let totalKW=0,totalBiaya=0;
+  d.cabor.forEach(id=>{
+    const c=C.cabor.find(x=>x.id===id);
+    if(c){totalKW+=c.kW;totalBiaya+=c.biaya*v.r.cabor;}
+  });
+
+  html+=`<div class="cabor-summary">
+    <span>Terpilih: <strong class="text-accent">${d.cabor.length}</strong> cabor (min <span class="text-warn">5</span>)</span>
+    <span>Total kW: <strong class="text-primary">${fmt(totalKW)} kW</strong></span>
+    <span>Est. Biaya Cabor: <strong class="text-warn">Rp ${fmt(Math.round(totalBiaya))} jt</strong></span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="cabor-table"><thead><tr>
+    <th></th><th>Cabang Olahraga</th><th>Kelompok</th>
+    <th>Biaya (jt)</th><th>kW</th><th>Poff Base</th><th>Tiket (rb)</th><th>Online Base</th><th>Compat?</th>
+  </tr></thead><tbody>`;
+
+  C.cabor.forEach(c=>{
+    const sel=d.cabor.includes(c.id);
+    const compat=c.compat.includes(d.venue);
+    const esOK=!c.es||(V()?.bc||d.bc);
+    const available=compat&&esOK;
+    html+=`<tr class="cabor-row${sel?' selected':''}${!available?' unavailable':''}" onclick="toggleCabor('${c.id}')">
+      <td><div class="check-box${sel?' checked':''}${!available?' disabled':''}"></div></td>
+      <td>${c.e} ${c.name}${c.es?'<span class="na-badge">BC req</span>':''}</td>
+      <td style="color:var(--muted);font-size:11px">${c.g}</td>
+      <td>${fmt(Math.round(c.biaya*v.r.cabor))}</td>
+      <td>${c.kW===0?'<span class="text-accent">0 ✨</span>':fmt(c.kW)}</td>
+      <td>${fmt(c.pBase)}</td>
+      <td>${c.tiket}</td>
+      <td>${fmt(c.oBase)}</td>
+      <td>${available?'<span class="text-accent">✅</span>':'<span class="text-danger">❌</span>'}</td>
     </tr>`;
-  }).join('');
-
-  document.getElementById('total-cabor-label').textContent = sel.length;
-  const selTotal = sel.reduce((s,k)=>({ kw: s.kw+C.cabor[k].kebutuhanListrik, cost: s.cost+C.cabor[k].biayaPelaksanaan }), {kw:0,cost:0});
-  document.getElementById('cabor-power-total').textContent = selTotal.kw+' kVA';
-  document.getElementById('cabor-cost-total').textContent  = selTotal.cost+'M';
-
-  // Color the count label based on min/max
-  const label = document.getElementById('total-cabor-label');
-  if(sel.length < r.minCabor) label.style.color = 'var(--danger)';
-  else if(sel.length > r.maxCabor) label.style.color = 'var(--danger)';
-  else label.style.color = 'var(--accent)';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('cabor-list').innerHTML=html;
 }
 
-function toggleCabor(key){
-  const sel       = G.decisions.selectedCabor;
-  const available = getAvailableCabor();
-  const r         = C.rounds[G.round];
-
-  if(!available.has(key)) return; // blocked — not available at selected venues
-
-  const idx = sel.indexOf(key);
-  if(idx >= 0){
-    sel.splice(idx, 1);
-  } else {
-    if(sel.length >= r.maxCabor){
-      showToast(`Batas maksimum ${r.maxCabor} cabor untuk ronde ini sudah tercapai.`,'warn');
-      return;
-    }
-    sel.push(key);
-  }
-  renderCaborTable();
+function toggleCabor(id){
+  const d=D(); const v=V();
+  if(!v){showToast('Pilih venue dulu!');return;}
+  const c=C.cabor.find(x=>x.id===id);
+  const compat=c.compat.includes(d.venue);
+  const esOK=!c.es||(v.bc||d.bc);
+  if(!compat||!esOK){showToast('Cabor ini tidak kompatibel dengan venue yang dipilih.');return;}
+  const idx=d.cabor.indexOf(id);
+  if(idx>=0) d.cabor.splice(idx,1);
+  else d.cabor.push(id);
+  renderCaborTab();
   updatePreview();
 }
 
-// ── TOAST NOTIFICATION ──
-function showToast(msg, type='warn'){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast toast-'+type+' show';
-  clearTimeout(t._tid);
-  t._tid = setTimeout(()=>t.classList.remove('show'), 3500);
-}
+function renderListrikTab(){
+  const d=D(); const v=V();
+  const kWCabor=d.cabor.reduce((s,id)=>{const c=C.cabor.find(x=>x.id===id);return s+(c?c.kW:0);},0);
+  const kWExtras=(d.bc?200:0)+(d.streaming?80:0)+(d.opening?150:0)+(d.closing?100:0);
+  const kWTotal=kWCabor+kWExtras;
+  const kWVenue=v?v.kW:0;
+  const kWGenset=d.gensetKecil*300+d.gensetBesar*700;
+  const kWAvail=kWVenue+kWGenset;
+  const deficit=Math.max(0,kWTotal-kWVenue);
+  const gKCost=G.eventCard?.id==='L01'?32:20;
+  const gBCost=G.eventCard?.id==='L01'?56:35;
 
-// ═══════════════════════════════════════════════
-// LIVE PREVIEW
-// ═══════════════════════════════════════════════
-function getDecisions(){
-  return {
-    days:            +document.getElementById('rental-days').value,
-    selectedVenues:   G.decisions.selectedVenues,
-    selectedCabor:    G.decisions.selectedCabor,
-    foodstalls:      +document.getElementById('foodstalls').value,
-    foodtrucks:      +document.getElementById('foodtrucks').value,
-    extraToilets:    +document.getElementById('extra-toilets').value,
-    seating:         +document.getElementById('seating').value,
-    generators:      +document.getElementById('generators').value,
-    broadcastUpgrade: document.getElementById('broadcast-upgrade').checked,
-    backupInternet:   document.getElementById('backup-internet').checked,
-    marketing:        activeOpts.marketing,
-    staff:           +document.getElementById('staff').value
-  };
-}
-
-function updatePreview(){
-  try{
-    const d = getDecisions();
-    const r = calc(d, C.rounds[G.round]);
-    const c = r.constraints;
-    const $ = id => document.getElementById(id);
-
-    $('prev-cost').textContent   = fmtM(r.totalCost);
-    $('prev-rev').textContent    = fmtM(r.totalRevenue);
-    const budgetPct = Math.round(r.totalCost / r.budget * 100);
-    $('prev-budget').textContent = `${budgetPct}%`;
-    $('prev-budget').className   = `metric-val ${budgetPct>100?'neg':budgetPct>85?'warn':'pos'}`;
-
-    $('prev-offline').textContent       = r.effectiveOffline.toLocaleString();
-    $('prev-online').textContent        = r.onlineViewers.toLocaleString();
-    $('prev-capacity').textContent      = r.venueCap.toLocaleString();
-    $('prev-capacity-fill').textContent = r.capacityFillPct+'%';
-
-    $('prev-power-supply').textContent = r.powerSupply+' kVA';
-    $('prev-power-demand').textContent = r.powerDemand+' kVA';
-    $('prev-power-demand').className   = `metric-val ${r.powerDemand>r.powerSupply?'neg':r.powerDemand>r.powerSupply*0.85?'warn':'pos'}`;
-
-    const profitEl = $('preview-profit');
-    profitEl.textContent = fmtM(r.profit);
-    profitEl.style.color = color(r.profit);
-
-    $('venue-power-display').textContent  = r.venuePower+' kVA';
-    $('power-demand-display').textContent = r.powerDemand+' kVA';
-    $('toilet-required').textContent      = c.toilet.required;
-    $('toilet-have').textContent          = r.totalToilets;
-    $('staff-required').textContent       = c.staff.required;
-
-    const bcEl = $('bc-status');
-    if(bcEl){ bcEl.textContent = r.hasBroadcasting?'✓ Aktif':'✗ Tidak Aktif'; bcEl.className='vc-val '+(r.hasBroadcasting?'pos':'neg'); }
-
-    function dot(id,ok){ $('c-'+id+'-dot').className='constraint-dot '+(ok?'ok':'fail'); }
-    dot('power', c.power.ok);   $('c-power-txt').textContent   = `Listrik: ${r.powerDemand}/${r.powerSupply} kVA`;
-    dot('toilet',c.toilet.ok);  $('c-toilet-txt').textContent  = `Toilet: ${r.totalToilets}/${c.toilet.required} unit`;
-    dot('staff', c.staff.ok);   $('c-staff-txt').textContent   = `Staf: ${d.staff}/${c.staff.required}`;
-    dot('budget',c.budget.ok);  $('c-budget-txt').textContent  = `Anggaran: ${fmtM(r.totalCost)}/${fmtM(r.budget)}`;
-    dot('branch',c.branches.ok);$('c-branch-txt').textContent  = `Cabor: ${r.totalBranches}/${c.branches.required} min`;
-  }catch(e){}
-}
-
-// ═══════════════════════════════════════════════
-// SIMULATION
-// ═══════════════════════════════════════════════
-async function runSimulation(){
-  G.decisions = getDecisions();
-  showScreen('simulation');
-  const r = calc(G.decisions, C.rounds[G.round]);
-
-  const steps = [
-    {ico:'🏟',name:'Biaya Sewa Venue',        detail:`${G.decisions.selectedVenues.map(k=>C.venues[k].name).join(', ')} × ${G.decisions.days} hari`, val:r.venueCost},
-    {ico:'⚽',name:'Biaya Pelaksanaan Cabor',  detail:`${r.totalBranches} cabang olahraga`,                                                            val:r.sportsCost},
-    {ico:'🔧',name:'Fasilitas & Sanitasi',     detail:'Food stalls, food trucks, toilet tambahan, seating',                                            val:r.facilityCost},
-    {ico:'⚡',name:'Infrastruktur & Teknologi',detail:'Generator, broadcasting, backup internet',                                                      val:r.addonCost},
-    {ico:'📢',name:'Marketing & Operasional',  detail:`Marketing ${G.decisions.marketing} + staf`,                                                     val:r.mktCost + r.staffCost},
-  ];
-
-  const container = document.getElementById('sim-steps');
-  container.innerHTML = steps.map((_,i)=>`
-    <div class="sim-step" id="sim-step-${i}">
-      <div class="ico">${steps[i].ico}</div>
-      <div class="info"><div class="name">${steps[i].name}</div><div class="detail">${steps[i].detail}</div></div>
-      <div class="amount" id="sim-amt-${i}">—</div>
-    </div>`).join('');
-
-  const totals = document.getElementById('sim-totals');
-  totals.classList.remove('visible');
-  totals.innerHTML = '';
-  document.getElementById('sim-next').style.display = 'none';
-
-  for(let i=0;i<steps.length;i++){
-    const el = document.getElementById('sim-step-'+i);
-    el.classList.add('running');
-    await delay(600);
-    document.getElementById('sim-amt-'+i).textContent = fmtM(steps[i].val);
-    el.classList.remove('running');
-    el.classList.add('done');
-    await delay(150);
-  }
-
-  await delay(400);
-  totals.innerHTML = `
-    <div class="total-row"><span>Total Biaya</span><span style="color:var(--danger)">${fmtM(r.totalCost)}</span></div>
-    <div class="total-row"><span>Pendapatan Tiket</span><span>${fmtM(r.ticketRevenue)}</span></div>
-    <div class="total-row"><span>Pendapatan Sponsor</span><span>${fmtM(r.sponsorRevenue)}</span></div>
-    <div class="total-row"><span>Pendapatan F&B</span><span>${fmtM(r.foodRevenue)}</span></div>
-    <div class="total-row"><span>Total Pendapatan</span><span style="color:var(--primary)">${fmtM(r.totalRevenue)}</span></div>
-    ${r.penalties.map(p=>`<div class="total-row" style="font-size:13px"><span style="color:var(--danger)">⚠ ${p.name}</span><span style="color:var(--danger)">${p.desc}</span></div>`).join('')}
-    <div class="total-row ${r.profit<0?'neg':''}"><span>NET PROFIT</span><span style="color:${color(r.profit)}">${fmtM(r.profit)}</span></div>`;
-
-  await delay(200);
-  totals.classList.add('visible');
-
-  const sc   = score(G.decisions, r, C.rounds[G.round]);
-  const comp = assessCompetencies(G.decisions, r);
-  G.allResults = {d:G.decisions, res:r, sc, comp, round:G.round};
-
-  await delay(800);
-  document.getElementById('sim-next').style.display = 'block';
-}
-
-function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
-// ═══════════════════════════════════════════════
-// RESULTS
-// ═══════════════════════════════════════════════
-function showResults(){
-  const {d,res,sc,comp,round} = G.allResults;
-  const r      = C.rounds[round];
-  const assess = buildAssessment(d,res,comp);
-  G.history[round] = {profit:res.profit, scores:sc, comp, res};
-  showScreen('results');
-  document.getElementById('results-round-label').textContent = `Ronde ${r.id} dari 3 – ${r.name}`;
-
-  document.getElementById('score-cards').innerHTML = `
-    <div class="score-card ${sc.profitScore>=60?'good':sc.profitScore>=30?'warn':'bad'}">
-      <div class="s-label">Skor Profit</div><div class="s-value">${sc.profitScore}</div>
-      <div class="s-sub">${fmtM(res.profit)} net profit · bobot 35%</div>
+  document.getElementById('tab-listrik-content').innerHTML=`
+    <div class="section-card">
+      <div class="section-title">⚡ Status Listrik</div>
+      <div class="power-status-grid">
+        <div class="power-stat"><div class="ps-label">kW Venue</div><div class="ps-val text-primary">${fmt(kWVenue)}</div></div>
+        <div class="power-stat"><div class="ps-label">kW Cabor</div><div class="ps-val">${fmt(kWCabor)}</div></div>
+        <div class="power-stat"><div class="ps-label">kW Extras</div><div class="ps-val">${fmt(kWExtras)}</div></div>
+        <div class="power-stat"><div class="ps-label">kW Total Pakai</div><div class="ps-val ${kWTotal>kWVenue?'text-danger':'text-warn'}">${fmt(kWTotal)}</div></div>
+        <div class="power-stat"><div class="ps-label">kW Genset</div><div class="ps-val text-accent">${fmt(kWGenset)}</div></div>
+        <div class="power-stat"><div class="ps-label">kW Tersedia</div><div class="ps-val ${kWTotal>kWAvail?'text-danger':'text-accent'}">${fmt(kWAvail)}</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;padding:8px 12px;border-radius:6px;background:${deficit>0?(kWGenset>=deficit?'rgba(16,185,129,.1)':'rgba(239,68,68,.1)'):'rgba(16,185,129,.1)'}">
+        ${deficit>0?`Deficit: ${fmt(deficit)} kW — ${kWGenset>=deficit?'✅ ditutup genset':'❌ BLACKOUT — beli genset!'}`:
+        `Surplus: ${fmt(kWVenue-kWTotal)} kW — ✅ Aman${kWGenset>0?' (hati-hati: genset mungkin tidak diperlukan)':''}`}
+      </div>
     </div>
-    <div class="score-card ${sc.complianceScore>=80?'good':sc.complianceScore>=50?'warn':'bad'}">
-      <div class="s-label">Kepatuhan Constraint</div><div class="s-value">${sc.complianceScore}</div>
-      <div class="s-sub">${[res.constraints.power.ok,res.constraints.toilet.ok,res.constraints.staff.ok,res.constraints.budget.ok,res.constraints.branches.ok].filter(Boolean).length}/5 terpenuhi · bobot 30%</div>
+
+    <div class="section-card">
+      <div class="section-title">📡 Broadcasting & Streaming</div>
+      ${!v?.bc?`
+        <label class="extra-check-item">
+          <input type="checkbox" ${d.bc?'checked':''} onchange="setExtra('bc',this.checked)">
+          <div>
+            <div class="extra-name">Paket Broadcasting — Rp 80jt <span style="color:var(--muted)">(+200 kW)</span></div>
+            <div class="extra-hint">Aktifkan live streaming online. WAJIB untuk viewers online & E-Sport.</div>
+          </div>
+        </label>`:`<div style="font-size:12px;color:var(--accent);margin-bottom:12px">✅ Broadcasting built-in di venue ini</div>`}
+      <label class="extra-check-item" style="${!(v?.bc||d.bc)?'opacity:.4;pointer-events:none':''}">
+        <input type="checkbox" ${d.streaming?'checked':''} onchange="setExtra('streaming',this.checked)" ${!(v?.bc||d.bc)?'disabled':''}>
+        <div>
+          <div class="extra-name">Streaming Upgrade — Rp 45jt <span style="color:var(--muted)">(+80 kW)</span></div>
+          <div class="extra-hint">Penonton online ×1.2. Syarat: broadcasting aktif.</div>
+        </div>
+      </label>
     </div>
-    <div class="score-card ${sc.effScore>=60?'good':sc.effScore>=30?'warn':'bad'}">
-      <div class="s-label">Efisiensi</div><div class="s-value">${sc.effScore}</div>
-      <div class="s-sub">Rev/Biaya = ${(res.totalRevenue/Math.max(res.totalCost,1)).toFixed(2)}× · bobot 20%</div>
+
+    <div class="section-card">
+      <div class="section-title">🔋 Generator Tambahan <span style="font-weight:400;font-size:11px;color:var(--muted)">(maks 2 unit total)</span>
+        ${G.eventCard?.id==='L01'?'<span class="tag tag-red" style="margin-left:6px">⚡ HARGA ×1.60!</span>':''}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Total unit: ${d.gensetKecil+d.gensetBesar}/2 ${d.gensetKecil+d.gensetBesar>2?'<span class="text-danger">⚠️ Melebihi batas!</span>':''}</div>
+      ${buildSlider('gensetKecil',d.gensetKecil,0,2,`Genset Kecil (300 kW) — Rp ${gKCost}jt/unit`,'unit')}
+      ${buildSlider('gensetBesar',d.gensetBesar,0,2,`Genset Besar (700 kW) — Rp ${gBCost}jt/unit`,'unit')}
     </div>
-    <div class="score-card ${sc.riskScore>=60?'good':sc.riskScore>=30?'warn':'bad'}">
-      <div class="s-label">Stabilitas / Risiko</div><div class="s-value">${sc.riskScore}</div>
-      <div class="s-sub">Broadcasting: ${res.hasBroadcasting?'Aktif':'Tidak'} · bobot 15%</div>
-    </div>
-    <div class="score-card ${sc.total>=70?'good':sc.total>=40?'warn':'bad'}" style="border:2px solid var(--primary)">
-      <div class="s-label">Skor Total Ronde</div>
-      <div class="s-value" style="font-size:56px">${sc.total}</div>
-      <div class="s-sub">${getGrade(sc.total)}</div>
-    </div>`;
-
-  const c = res.constraints;
-  document.getElementById('constraint-list').innerHTML = `<div class="section-title">Kepatuhan Constraint</div>` +
-    [['Kapasitas Listrik', `${res.powerDemand} kVA demand vs ${res.powerSupply} kVA supply`, c.power.ok],
-     ['Sanitasi',          `${res.totalToilets} toilet tersedia, ${c.toilet.required} dibutuhkan`, c.toilet.ok],
-     ['Tenaga Staf',       `${d.staff} staf, ${c.staff.required} dibutuhkan`, c.staff.ok],
-     ['Anggaran',          `${fmtM(res.totalCost)} biaya vs ${fmtM(res.budget)} anggaran`, c.budget.ok],
-     ['Jumlah Cabor',      `${res.totalBranches} cabor dipilih, ${r.minCabor}–${r.maxCabor} range`, c.branches.ok]
-    ].map(([name,detail,ok])=>`
-      <div class="c-item">
-        <div><div style="font-weight:600">${name}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${detail}</div></div>
-        <span class="c-badge ${ok?'ok':'fail'}">${ok?'LOLOS':'GAGAL'}</span>
-      </div>`).join('');
-
-  const maxCost = res.totalCost||1;
-  document.getElementById('cost-bars').innerHTML = [
-    ['Venue',res.venueCost,'#0ea5e9'],['Cabor',res.sportsCost,'#8b5cf6'],
-    ['Fasilitas',res.facilityCost,'#f59e0b'],['Infrastruktur',res.addonCost,'#10b981'],
-    ['Marketing',res.mktCost,'#ec4899'],['Staf',res.staffCost,'#f97316']
-  ].map(([l,v,clr])=>barRow(l,v,maxCost,clr)).join('');
-
-  const maxRev = res.totalRevenue||1;
-  document.getElementById('rev-bars').innerHTML = [
-    ['Tiket',res.ticketRevenue,'#0ea5e9'],
-    ['Sponsor',res.sponsorRevenue,'#10b981'],
-    ['F&B',res.foodRevenue,'#f59e0b']
-  ].map(([l,v,clr])=>barRow(l,v,maxRev,clr)).join('');
-
-  const compData = [
-    ['Analitik',      comp.analytic,   '#0ea5e9'],
-    ['Strategis',     comp.strategic,  '#10b981'],
-    ['Manaj. Risiko', comp.risk,       '#f59e0b'],
-    ['Prioritisasi',  comp.prioritize, '#8b5cf6'],
-    ['Trade-off',     comp.tradeoff,   '#ec4899']
-  ];
-  document.getElementById('comp-bars').innerHTML = compData.map(([l,v,clr])=>`
-    <div class="comp-row">
-      <div class="comp-label">${l}</div>
-      <div class="comp-track"><div class="comp-fill" style="width:${v}%;background:${clr}">${v}</div></div>
-      <div class="comp-score" style="color:${clr}">${v}</div>
-    </div>`).join('');
-
-  setTimeout(()=>{
-    drawRadar(document.getElementById('radar-canvas'),
-      compData.map(c=>c[0]), compData.map(c=>c[1]/100));
-  },100);
-
-  document.getElementById('strengths-list').innerHTML =
-    assess.strengths.map(s=>`<div class="strength-item">${s}</div>`).join('') ||
-    '<div style="color:var(--muted);font-size:13px">Tidak ada kekuatan signifikan ronde ini.</div>';
-  document.getElementById('weaknesses-list').innerHTML =
-    assess.weaknesses.map(s=>`<div class="weakness-item">${s}</div>`).join('') ||
-    '<div style="color:var(--muted);font-size:13px">Tidak ada kelemahan kritis yang teridentifikasi.</div>';
-  document.getElementById('penalty-notices').innerHTML = res.penalties.length ?
-    `<div class="penalty-notice"><strong>⚠ Pelanggaran Constraint:</strong><br>${res.penalties.map(p=>`• ${p.name}: ${p.desc}`).join('<br>')}</div>` : '';
-
-  const nextBtn = document.getElementById('next-round-btn');
-  if(round >= 2){ nextBtn.textContent='Lihat Laporan Akhir →'; nextBtn.onclick=showFinalReport; }
-  else { nextBtn.textContent=`Lanjut ke Ronde ${round+2} →`; nextBtn.onclick=nextRound; }
+  `;
 }
 
-function barRow(label,val,max,clr){
-  const pct = Math.round(val/max*100);
-  return `<div class="bar-row">
-    <div class="bar-label">${label}</div>
-    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${clr}">${fmtM(val)}</div></div>
-    <div class="bar-val" style="color:${clr}">${pct}%</div>
+function renderAddonsTab(){
+  const d=D();
+  document.getElementById('tab-addons-content').innerHTML=`
+    <div class="section-card">
+      <div class="section-title">🎉 Panggung Hiburan</div>
+      <label class="extra-check-item">
+        <input type="checkbox" ${d.opening?'checked':''} onchange="setExtra('opening',this.checked)">
+        <div>
+          <div class="extra-name">Panggung Opening — Rp 60jt <span style="color:var(--muted)">(+150 kW)</span></div>
+          <div class="extra-hint">poff ×${G.eventCard?.id==='A01'?'<span class="text-warn">1.30</span>':'1.10'} — efek berantai: toilet & security harus diupdate!</div>
+        </div>
+      </label>
+      <label class="extra-check-item">
+        <input type="checkbox" ${d.closing?'checked':''} onchange="setExtra('closing',this.checked)">
+        <div>
+          <div class="extra-name">Panggung Closing — Rp 50jt <span style="color:var(--muted)">(+100 kW)</span></div>
+          <div class="extra-hint">poff ×1.08 — efek kumulatif jika bersama Opening.</div>
+        </div>
+      </label>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">🍔 Food & Beverage</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Catchment system: revenue dibatasi oleh jumlah penonton aktual.</div>
+      ${buildSlider('foodStall',d.foodStall,0,15,'Food Stall — Rp 8jt/unit, rev maks Rp 15jt/unit (800 pax/unit)','unit')}
+      ${buildSlider('foodTruck',d.foodTruck,0,10,'Food Truck — Rp 12jt/unit, rev maks Rp 22jt/unit (1.200 pax/unit)','unit')}
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">🎪 Booth & Media</div>
+      ${buildSlider('boothSponsor',d.boothSponsor,0,10,'Booth Sponsor — Rp 10jt/booth, rev Rp 30jt × saturasi (5.000 viewers/booth)','booth')}
+      <label class="extra-check-item" style="margin-top:10px">
+        <input type="checkbox" ${d.msa?'checked':''} onchange="setExtra('msa',this.checked)">
+        <div>
+          <div class="extra-name">Media Sosial Ads (MSA) — Rp 35jt</div>
+          <div class="extra-hint">Penonton online ×1.15. Stack dengan Streaming untuk max online viewers.</div>
+        </div>
+      </label>
+    </div>
+  `;
+}
+
+function renderOpTab(){
+  const d=D(); const v=V();
+  const r=calc(d,G.phase===2?G.eventCard:null);
+  const poff=r?r.poffSum:0;
+  const tReq=poff>0?Math.ceil(poff/100):0;
+  const sReq=poff>0?Math.max(10,Math.ceil(poff/200)):10;
+
+  document.getElementById('tab-op-content').innerHTML=`
+    <div class="section-card">
+      <div class="section-title">🚽 Toilet Portable</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+        Bawaan venue: <strong class="text-primary">${v?v.toilets:0}</strong> unit &nbsp;|&nbsp;
+        Dibutuhkan: <strong class="text-warn">${tReq}</strong> unit (≥ penonton÷100) &nbsp;|&nbsp;
+        Total kamu: <strong class="${r&&r.toiletsTotal>=tReq?'text-accent':'text-danger'}">${r?r.toiletsTotal:0}</strong>
+      </div>
+      ${buildSlider('toilet10',d.toilet10,0,5,'Pak 10 unit — Rp 22jt/pak','pak')}
+      ${buildSlider('toilet5',d.toilet5,0,10,'Pak 5 unit — Rp 12jt/pak','pak')}
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">🛡️ Petugas Keamanan</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+        Dibutuhkan: <strong class="text-warn">${sReq}</strong> org (≥ max(10, penonton÷200)) &nbsp;|&nbsp;
+        Kamu beli: <strong class="${r&&r.securityTotal>=sReq?'text-accent':'text-danger'}">${d.security*10}</strong> org
+      </div>
+      ${buildSlider('security',d.security,0,20,'Pak 10 org — Rp 15jt/pak','pak')}
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">🏥 Tim Medis</div>
+      <label class="extra-check-item">
+        <input type="checkbox" ${d.medis?'checked':''} onchange="setExtra('medis',this.checked)">
+        <div>
+          <div class="extra-name">Tim Medis & P3K — Rp 25jt <span class="tag tag-red" style="margin-left:4px">WAJIB</span></div>
+          <div class="extra-hint">Event tidak sah tanpa tim medis. Constraint wajib!</div>
+        </div>
+      </label>
+    </div>
+  `;
+}
+
+function buildSlider(key,val,min,max,label,unit){
+  return `<div class="form-group" style="margin-bottom:14px">
+    <label style="font-size:12px;color:var(--muted);font-weight:600">${label}</label>
+    <div class="slider-wrap">
+      <input type="range" min="${min}" max="${max}" value="${val}"
+        oninput="setExtra('${key}',+this.value);document.getElementById('sv-${key}').textContent=this.value">
+      <div class="slider-val" id="sv-${key}">${val} ${unit}</div>
+    </div>
   </div>`;
 }
 
-function getGrade(s){
-  if(s>=90)return'★ Luar Biasa';
-  if(s>=75)return'✦ Sangat Baik';
-  if(s>=60)return'◆ Cakap';
-  if(s>=45)return'◇ Berkembang';
-  return'△ Perlu Perbaikan';
+function setExtra(key,val){
+  const d=D();
+  if(key==='streaming'&&val&&!V()?.bc&&!d.bc){showToast('Aktifkan Broadcasting dulu!');return;}
+  d[key]=val;
+  // Re-render relevant tabs
+  if(key==='bc'||key==='streaming'){renderListrikTab();renderCaborTab();}
+  if(key==='opening'||key==='closing') renderAddonsTab();
+  updatePreview();
 }
 
-// ═══════════════════════════════════════════════
-// RADAR CHART
-// ═══════════════════════════════════════════════
-function drawRadar(canvas, labels, values){
-  const ctx=canvas.getContext('2d');
-  const W=canvas.width, H=canvas.height;
-  ctx.clearRect(0,0,W,H);
-  const cx=W/2, cy=H/2, r=Math.min(W,H)/2-36;
-  const n=labels.length;
-  const angle=i=>-Math.PI/2+(2*Math.PI/n)*i;
-  for(let ring=1;ring<=5;ring++){
-    ctx.beginPath();
-    for(let i=0;i<n;i++){
-      const a=angle(i),rr=r*ring/5;
-      i===0?ctx.moveTo(cx+rr*Math.cos(a),cy+rr*Math.sin(a)):ctx.lineTo(cx+rr*Math.cos(a),cy+rr*Math.sin(a));
-    }
-    ctx.closePath();
-    ctx.strokeStyle=ring===5?'#2d4060':'#1e3048';
-    ctx.lineWidth=ring===5?1.5:1; ctx.stroke();
-  }
-  for(let i=0;i<n;i++){
-    ctx.beginPath(); ctx.moveTo(cx,cy);
-    ctx.lineTo(cx+r*Math.cos(angle(i)),cy+r*Math.sin(angle(i)));
-    ctx.strokeStyle='#1e3048'; ctx.lineWidth=1; ctx.stroke();
-  }
-  ctx.beginPath();
-  values.forEach((v,i)=>{
-    const a=angle(i),rv=r*v;
-    i===0?ctx.moveTo(cx+rv*Math.cos(a),cy+rv*Math.sin(a)):ctx.lineTo(cx+rv*Math.cos(a),cy+rv*Math.sin(a));
-  });
-  ctx.closePath();
-  ctx.fillStyle='rgba(14,165,233,.18)'; ctx.fill();
-  ctx.strokeStyle='#0ea5e9'; ctx.lineWidth=2; ctx.stroke();
-  values.forEach((v,i)=>{
-    const a=angle(i),rv=r*v;
-    ctx.beginPath(); ctx.arc(cx+rv*Math.cos(a),cy+rv*Math.sin(a),4,0,Math.PI*2);
-    ctx.fillStyle='#0ea5e9'; ctx.fill();
-  });
-  ctx.fillStyle='#94a3b8'; ctx.font='bold 10px Segoe UI,sans-serif'; ctx.textAlign='center';
-  labels.forEach((l,i)=>{
-    const a=angle(i),rr=r+22;
-    ctx.fillText(l, cx+rr*Math.cos(a), cy+rr*Math.sin(a)+4);
-  });
-}
+function updatePreview(){
+  const d=D(); const ec=G.phase===2?G.eventCard:null;
+  const r=calc(d,ec);
+  if(!r){ clearPreview(); return; }
 
-// ═══════════════════════════════════════════════
-// GAME FLOW
-// ═══════════════════════════════════════════════
-function nextRound(){
-  G.round++;
-  if(G.round >= 3){ showFinalReport(); return; }
-  G.decisions = DEFAULT_DECISIONS();
-  Object.assign(activeOpts, {marketing:'medium'});
-  renderBriefing();
-  showScreen('briefing');
-}
+  // Profit
+  const pp=document.getElementById('preview-profit');
+  pp.textContent=`Rp ${fmt(Math.round(r.profit))} jt`;
+  pp.className='amount '+(r.profit>0?'pos':r.profit<0?'neg':'');
 
-function showFinalReport(){
-  showScreen('final-report');
-  const totals     = G.history.map(h=>h.scores.total);
-  const finalScore = Math.round(totals.reduce((s,t)=>s+t,0)/totals.length);
-  const n          = G.history.length;
-  const avgComp = {
-    analytic:   Math.round(G.history.reduce((s,h)=>s+h.comp.analytic,  0)/n),
-    strategic:  Math.round(G.history.reduce((s,h)=>s+h.comp.strategic, 0)/n),
-    risk:       Math.round(G.history.reduce((s,h)=>s+h.comp.risk,      0)/n),
-    prioritize: Math.round(G.history.reduce((s,h)=>s+h.comp.prioritize,0)/n),
-    tradeoff:   Math.round(G.history.reduce((s,h)=>s+h.comp.tradeoff,  0)/n)
-  };
-  document.getElementById('final-score').textContent = finalScore;
-  document.getElementById('grade-label').innerHTML =
-    `<span class="tag tag-${finalScore>=75?'green':finalScore>=50?'warn':'red'}" style="font-size:18px;padding:8px 20px">${getGrade(finalScore)}</span>`;
+  setTxt('prev-cost',  `Rp ${fmt(Math.round(r.totalCost))} jt`);
+  setTxt('prev-rev',   `Rp ${fmt(Math.round(r.totalRev))} jt`);
+  setTxt('prev-sisa',  `Rp ${fmt(3000-Math.round(r.totalCost))} jt`);
+  setTxt('prev-poff',  fmt(Math.round(r.poffSum)));
+  setTxt('prev-pon',   fmt(Math.round(r.ponSum)));
+  setTxt('prev-viewers',fmt(Math.round(r.totalViewers)));
+  setTxt('prev-sponsor',`${C.sponsorTiers[r.sponsorIdx].tier} = Rp ${r.revSponsor} jt`);
+  setTxt('prev-kw',    `${fmt(r.kWTotal)} / ${fmt(r.kWAvail)} kW`);
 
-  const compData = [
-    ['Analitik',      avgComp.analytic,   '#0ea5e9'],
-    ['Strategis',     avgComp.strategic,  '#10b981'],
-    ['Manaj. Risiko', avgComp.risk,       '#f59e0b'],
-    ['Prioritisasi',  avgComp.prioritize, '#8b5cf6'],
-    ['Trade-off',     avgComp.tradeoff,   '#ec4899']
+  // Constraints
+  const cons=[
+    {id:'c-listrik',ok:r.constraints.listrik,txt:`Listrik: ${r.blackout?'❌ BLACKOUT':'✅ OK'} (${fmt(r.kWTotal)}/${fmt(r.kWAvail)} kW)`},
+    {id:'c-toilet', ok:r.constraints.toilet, txt:`Toilet: ${r.toiletsTotal}/${r.toiletsReq} unit ${r.constraints.toilet?'✅':'❌'}`},
+    {id:'c-sec',    ok:r.constraints.security,txt:`Security: ${r.securityTotal}/${r.securityReq} org ${r.constraints.security?'✅':'❌'}`},
+    {id:'c-cabor',  ok:r.constraints.cabor,  txt:`Cabor: ${d.cabor.length} pilih, ${r.nIncompat} incompat ${r.constraints.cabor?'✅':'❌'}`},
+    {id:'c-medis',  ok:r.constraints.medis,  txt:`Medis: ${r.constraints.medis?'✅ Dibeli':'❌ Belum dibeli!'}`},
+    {id:'c-budget', ok:r.constraints.budget, txt:`Budget: Rp ${fmt(Math.round(r.totalCost))} / 3.000 jt ${r.constraints.budget?'✅':'❌'}`},
   ];
-  document.getElementById('final-comp-bars').innerHTML = compData.map(([l,v,clr])=>`
-    <div class="comp-row">
-      <div class="comp-label">${l}</div>
-      <div class="comp-track"><div class="comp-fill" style="width:${v}%;background:${clr}">${v}</div></div>
-      <div class="comp-score" style="color:${clr}">${v}</div>
+  cons.forEach(c=>{
+    const dot=document.getElementById(c.id+'-dot');
+    const txt=document.getElementById(c.id+'-txt');
+    if(dot){dot.className='constraint-dot '+(c.ok?'ok':'fail');}
+    if(txt){txt.textContent=c.txt;}
+  });
+}
+
+function clearPreview(){
+  const els=['preview-profit','prev-cost','prev-rev','prev-sisa','prev-poff','prev-pon','prev-viewers','prev-sponsor','prev-kw'];
+  els.forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
+}
+
+function setTxt(id,val){const e=document.getElementById(id);if(e)e.textContent=val;}
+
+// ══════════════════════════════════════════════════════
+// UI – SIMULATION
+// ══════════════════════════════════════════════════════
+function runSimulation(){
+  const d=D(); const ec=G.phase===2?G.eventCard:null;
+  const v=V();
+
+  if(!d.venue){showToast('Pilih venue dulu!');return;}
+  if(d.cabor.length<5){showToast(`Min 5 cabor — baru ${d.cabor.length} terpilih!`);return;}
+
+  const r=calc(d,ec);
+  const timeMin=elapsedMin();
+
+  if(G.phase===1){
+    G.p1r=r; G.p1time=timeMin;
+    G.p1s=scorePhase(r,timeMin);
+  } else {
+    G.p2r=r;
+    const la=calcLA(ec,G.p1d,d,G.p1r,r);
+    G.p2s=scoreWithEC(r,timeMin,la);
+  }
+
+  showScreen('simulation');
+  document.getElementById('sim-subtitle').textContent=
+    G.phase===1?'Menghitung konfigurasi event Anda…':'Menghitung hasil setelah adaptasi Event Card…';
+  animateSim(r,v,d,ec);
+}
+
+function animateSim(r,v,d,ec){
+  const steps=[
+    {ico:'🏟',name:'Venue & Kapasitas',
+     detail:`${v.name} — Listrik ${fmt(r.kWVenue)} kW | Toilet ${v.toilets} unit | BC: ${r.bcActive?'Aktif':'Tidak'}`,
+     val:`Rp ${fmt(r.costVenue)} jt`},
+    {ico:'⚽',name:'Cabang Olahraga',
+     detail:`${d.cabor.length} cabor (${r.nIncompat} inkompatibel) — kW: ${fmt(r.kWCabor)}`,
+     val:`Rp ${fmt(Math.round(r.costCabor))} jt`},
+    {ico:'⚡',name:'Verifikasi Listrik',
+     detail:`Pakai: ${fmt(r.kWTotal)} kW | Tersedia: ${fmt(r.kWAvail)} kW | Deficit: ${fmt(r.kWDeficit)} kW`,
+     val:r.blackout?'❌ BLACKOUT':'✅ Aman'},
+    {ico:'🚽',name:'Sanitasi & Keamanan',
+     detail:`Toilet: ${r.toiletsTotal}/${r.toiletsReq} unit | Security: ${r.securityTotal}/${r.securityReq} org`,
+     val:r.constraints.toilet&&r.constraints.security?'✅ OK':'❌ Kurang'},
+    {ico:'💰',name:'Revenue',
+     detail:`Tiket: ${fmt(Math.round(r.revTiket))}M | Sponsor: ${fmt(r.revSponsor)}M | F&B: ${fmt(Math.round(r.revFoodStall+r.revFoodTruck))}M`,
+     val:`Rp ${fmt(Math.round(r.totalRev))} jt`},
+    {ico:'📊',name:'Profit Akhir',
+     detail:`Revenue ${fmt(Math.round(r.totalRev))}M − Cost ${fmt(Math.round(r.totalCost))}M`,
+     val:`${r.profit>=0?'+':''}${fmt(Math.round(r.profit))} jt`},
+  ];
+
+  const container=document.getElementById('sim-steps');
+  container.innerHTML='';
+  steps.forEach(s=>{
+    container.insertAdjacentHTML('beforeend',`
+      <div class="sim-step" id="ss-${s.ico}">
+        <div class="ico">${s.ico}</div>
+        <div class="info"><div class="name">${s.name}</div><div class="detail">${s.detail}</div></div>
+        <div class="amount">${s.val}</div>
+      </div>`);
+  });
+
+  document.getElementById('sim-totals').classList.remove('visible');
+  document.getElementById('sim-next').style.display='none';
+
+  let i=0;
+  const tick=()=>{
+    if(i<steps.length){
+      const el=container.children[i];
+      if(el){el.classList.add('running');setTimeout(()=>{el.classList.remove('running');el.classList.add('done');},350);}
+      i++; setTimeout(tick,420);
+    } else {
+      const tot=document.getElementById('sim-totals');
+      tot.innerHTML=`
+        <div class="total-row"><span>Total Cost</span><span>Rp ${fmt(Math.round(r.totalCost))} jt</span></div>
+        <div class="total-row"><span>Total Revenue</span><span>Rp ${fmt(Math.round(r.totalRev))} jt</span></div>
+        <div class="total-row${r.profit<0?' neg':''}"><span>PROFIT</span><span>${fmtM(Math.round(r.profit))}</span></div>`;
+      tot.classList.add('visible');
+      setTimeout(()=>{
+        document.getElementById('sim-next').style.display='block';
+      },600);
+    }
+  };
+  setTimeout(tick,300);
+}
+
+// ══════════════════════════════════════════════════════
+// UI – RESULTS
+// ══════════════════════════════════════════════════════
+function showResults(){
+  const r = G.phase===1 ? G.p1r : G.p2r;
+  const s = G.phase===1 ? G.p1s : G.p2s;
+  const d = G.phase===1 ? G.p1d : G.p2d;
+  const ec= G.phase===2 ? G.eventCard : null;
+  const isP2 = G.phase===2;
+
+  document.getElementById('results-round-label').textContent=
+    isP2?'Fase 2 — Dengan Event Card '+ec.e+' '+ec.name:'Fase 1 — Perencanaan Umum';
+
+  // Score cards
+  const cards=[
+    {label:'Systems Thinking',val:isP2?s.st:s.st,max:isP2?20:25,cls:s.st>=(isP2?16:20)?'good':s.st<(isP2?8:10)?'bad':'warn',sub:`${Object.values(r.constraints).filter(Boolean).length}/6 constraint lulus`},
+    {label:'Strategic Planning',val:isP2?s.sp:s.sp,max:isP2?20:25,cls:s.sp>=(isP2?15:20)?'good':s.sp<(isP2?8:10)?'bad':'warn',sub:`Margin ${r.margin.toFixed(1)}%`},
+    {label:'Resource Stewardship',val:isP2?s.rs:s.rs,max:isP2?20:25,cls:s.rs>=(isP2?16:20)?'good':s.rs<(isP2?8:10)?'bad':'warn',sub:`RS Total ${r.totalRS}/25`},
+    {label:'Decisiveness',val:isP2?s.dec:s.dec,max:isP2?20:25,cls:s.dec>=(isP2?15:20)?'good':s.dec<(isP2?8:10)?'bad':'warn',sub:`Waktu: ${G.phase===1?G.p1time.toFixed(1):(elapsedMin()).toFixed(1)} mnt`},
+  ];
+  if(isP2){
+    const la=s.la_detail;
+    cards.push({label:'Learning Agility',val:s.la,max:20,cls:s.la>=16?'good':s.la<8?'bad':'warn',
+      sub:`Diag:${la.diag}/8 Eff:${la.eff}/12 Int:${la.integ}/5`});
+  }
+  cards.push({label:'TOTAL SKOR',val:s.total,max:100,cls:s.total>=80?'good':s.total>=50?'warn':'bad',sub:gradeLabel(s.total)});
+
+  document.getElementById('score-cards').innerHTML=cards.map(c=>`
+    <div class="score-card ${c.cls}">
+      <div class="s-label">${c.label}</div>
+      <div class="s-value">${c.val}<span style="font-size:18px;font-weight:400;color:var(--muted)">/${c.max}</span></div>
+      <div class="s-sub">${c.sub}</div>
     </div>`).join('');
 
-  setTimeout(()=>{
-    drawRadar(document.getElementById('final-radar'),
-      compData.map(c=>c[0]), compData.map(c=>c[1]/100));
-  },100);
+  // Constraints
+  const cItems=[
+    {k:'listrik', label:'Listrik', detail:`${fmt(r.kWTotal)} kW dipakai / ${fmt(r.kWAvail)} kW tersedia`},
+    {k:'toilet',  label:'Toilet',  detail:`${r.toiletsTotal} unit tersedia / ${r.toiletsReq} dibutuhkan`},
+    {k:'security',label:'Security',detail:`${r.securityTotal} org / ${r.securityReq} dibutuhkan`},
+    {k:'cabor',   label:'Cabor',   detail:`${d.cabor.length} terpilih, ${r.nIncompat} inkompatibel`},
+    {k:'medis',   label:'Medis',   detail:`Tim Medis: ${d.medis?'Dibeli':'BELUM DIBELI!'}`},
+    {k:'budget',  label:'Budget',  detail:`Rp ${fmt(Math.round(r.totalCost))} / 3.000 jt`},
+  ];
+  document.getElementById('constraint-list').innerHTML=
+    `<div class="section-title">Verifikasi 6 Constraint</div>`+
+    cItems.map(c=>`<div class="c-item">
+      <span>${c.label}: ${c.detail}</span>
+      <span class="c-badge ${r.constraints[c.k]?'ok':'fail'}">${r.constraints[c.k]?'✅ LULUS':'❌ GAGAL'}</span>
+    </div>`).join('');
 
-  const strongest   = compData.reduce((a,b)=>a[1]>=b[1]?a:b);
-  const weakest     = compData.reduce((a,b)=>a[1]<=b[1]?a:b);
-  const totalProfit = G.history.reduce((s,h)=>s+(h.profit||0),0);
+  // Cost bars
+  buildBars('cost-bars',[
+    {label:'Venue',val:r.costVenue},
+    {label:'Cabor',val:Math.round(r.costCabor)},
+    {label:'Extras',val:Math.round(r.costExtras)},
+  ],r.totalCost,'var(--danger)');
 
-  document.getElementById('final-assessment').innerHTML = `
-    <h3>Penilaian Akhir</h3>
-    <p style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:16px">
-      Sepanjang 3 ronde, performa Anda sebagai Event Director menunjukkan kemampuan
-      <strong style="color:var(--text)">${getGrade(finalScore).replace(/[★✦◆◇△]\s/,'')}</strong>
-      dalam perencanaan ekosistem event olahraga. Total profit bersih: <strong style="color:${color(totalProfit)}">${fmtM(totalProfit)}</strong>.
-    </p>
-    <div class="divider"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
-      <div>
-        <div style="font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Kekuatan Utama</div>
-        <div style="font-size:14px;font-weight:700">${strongest[0]}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:4px">Skor: ${strongest[1]}/100. Kompetensi paling konsisten.</div>
-      </div>
-      <div>
-        <div style="font-size:12px;color:var(--danger);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Area Pengembangan</div>
-        <div style="font-size:14px;font-weight:700">${weakest[0]}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:4px">Skor: ${weakest[1]}/100. Fokus di sini untuk peningkatan.</div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-top:12px">
-      <strong style="color:var(--text)">Performa Per Ronde:</strong>
-      ${G.history.map((h,i)=>`Ronde ${i+1}: Skor ${h.scores.total} (Profit: ${fmtM(h.profit)})`).join(' &nbsp;·&nbsp; ')}
+  buildBars('rev-bars',[
+    {label:'Tiket',val:Math.round(r.revTiket)},
+    {label:'Sponsor',val:r.revSponsor},
+    {label:'F&B',val:Math.round(r.revFoodStall+r.revFoodTruck)},
+    {label:'Booth',val:Math.round(r.revBooth)},
+  ],r.totalRev,'var(--accent)');
+
+  // RS detail
+  buildRSBars('rs-bars',[
+    {label:'Toilet',val:r.rs_toilet,hint:`Rasio: ${r.toiletsReq>0?(r.toiletsTotal/r.toiletsReq).toFixed(2)+'×':'N/A'}`},
+    {label:'Security',val:r.rs_security,hint:`Rasio: ${(r.securityTotal/Math.max(r.securityReq,1)).toFixed(2)}×`},
+    {label:'Listrik',val:r.rs_listrik,hint:`Deficit: ${fmt(r.kWDeficit)} kW, Genset: ${fmt(r.kWGenset)} kW`},
+    {label:'Budget',val:r.rs_budget,hint:`Sisa: ${fmt(Math.round(3000-r.totalCost))} jt (${((3000-r.totalCost)/3000*100).toFixed(0)}%)`},
+    {label:'F&B',val:r.rs_fb,hint:`Catchment ratio: ${r.catchRatio.toFixed(2)}×`},
+  ]);
+
+  // Assessment
+  buildAssessment(r,d,ec);
+
+  // Next button
+  const btn=document.getElementById('next-round-btn');
+  if(isP2){
+    btn.textContent='Lihat Laporan Akhir →';
+    btn.onclick=showFinalReport;
+  } else {
+    btn.textContent='Tarik Event Card →';
+    btn.onclick=showEventCard;
+  }
+
+  // Radar
+  const labels=['ST','SP','RS','Dec'];
+  const maxV=isP2?20:25;
+  const vals=isP2?[s.st,s.sp,s.rs,s.dec]:[s.st,s.sp,s.rs,s.dec];
+  if(isP2){labels.push('LA');vals.push(s.la);}
+  drawRadar(document.getElementById('radar-canvas'),vals,labels,maxV);
+
+  showScreen('results');
+}
+
+function buildBars(id,items,total,color){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.innerHTML=items.map(it=>{
+    const pct=total>0?Math.min(100,it.val/total*100):0;
+    return `<div class="bar-row">
+      <div class="bar-label">${it.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}">${fmt(it.val)}M</div></div>
     </div>`;
+  }).join('');
+}
+
+function buildRSBars(id,items){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.innerHTML=items.map(it=>{
+    const col=it.val>=5?'var(--accent)':it.val>=3?'var(--warn)':'var(--danger)';
+    return `<div class="comp-row">
+      <div class="comp-label">${it.label}</div>
+      <div class="comp-track"><div class="comp-fill" style="width:${it.val/5*100}%;background:${col}">${it.val}/5</div></div>
+      <div style="font-size:11px;color:var(--muted);margin-left:8px">${it.hint}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildAssessment(r,d,ec){
+  const strengths=[],weaknesses=[];
+  if(r.constraints.listrik) strengths.push('Kapasitas listrik terpenuhi dengan baik.');
+  else weaknesses.push('BLACKOUT — kapasitas listrik tidak mencukupi. Revenue hilang!');
+  if(r.constraints.toilet) strengths.push(`Toilet cukup (${r.toiletsTotal}/${r.toiletsReq} unit).`);
+  else weaknesses.push(`Toilet kurang — hanya ${r.toiletsTotal}, butuh ${r.toiletsReq} unit.`);
+  if(r.constraints.security) strengths.push(`Security mencukupi (${r.securityTotal}/${r.securityReq} org).`);
+  else weaknesses.push(`Security kurang — hanya ${r.securityTotal}, butuh ${r.securityReq} org.`);
+  if(r.constraints.cabor) strengths.push(`${d.cabor.length} cabor kompatibel semua — constraint terpenuhi.`);
+  else weaknesses.push(`${r.nIncompat} cabor inkompatibel — biaya dikenakan tanpa revenue!`);
+  if(r.constraints.medis) strengths.push('Tim Medis dibeli — constraint wajib terpenuhi.');
+  else weaknesses.push('Tim Medis TIDAK dibeli — constraint wajib gagal!');
+  if(r.profit>0) strengths.push(`Profit positif: Rp ${fmt(Math.round(r.profit))} jt (margin ${r.margin.toFixed(1)}%).`);
+  else weaknesses.push(`Rugi: Rp ${fmt(Math.round(Math.abs(r.profit)))} jt. Revenue tidak menutup biaya.`);
+  if(r.rs_listrik===5&&r.kWDeficit===0) strengths.push('Keputusan listrik sempurna — tidak perlu genset, tidak beli.');
+  if(r.rs_fb>=4) strengths.push(`F&B efisien — catchment ratio ${r.catchRatio.toFixed(2)}×.`);
+  if(r.rs_fb===0) weaknesses.push('F&B tidak efisien sama sekali — alokasi fatal.');
+  if(ec?.id==='C01'&&(d.venue==='v1'||d.venue==='v3')) weaknesses.push('Event Card Cuaca aktif — penonton outdoor turun 40%.');
+  if(ec?.id==='S01') weaknesses.push('Sponsor Mundur — revenue sponsor turun 1 tier.');
+
+  document.getElementById('strengths-list').innerHTML=strengths.map(s=>`<div class="strength-item">${s}</div>`).join('');
+  document.getElementById('weaknesses-list').innerHTML=weaknesses.map(w=>`<div class="weakness-item">${w}</div>`).join('');
+}
+
+function gradeLabel(score){
+  if(score>=80) return '🏆 Grade A — Sangat Baik';
+  if(score>=65) return '🥈 Grade B — Baik';
+  if(score>=50) return '🥉 Grade C — Cukup';
+  if(score>=35) return '📉 Grade D — Kurang';
+  return '❌ Grade E — Perlu Perbaikan';
+}
+
+// ══════════════════════════════════════════════════════
+// UI – EVENT CARD GACHA
+// ══════════════════════════════════════════════════════
+function showEventCard(){
+  G.phase=2;
+  showScreen('event-card');
+  document.getElementById('draw-result').style.display='none';
+  document.getElementById('draw-btn').style.display='inline-block';
+  document.getElementById('adapt-btn').style.display='none';
+  // Reset card display
+  document.querySelectorAll('.gacha-card').forEach(c=>{c.classList.remove('flipped','selected');});
+}
+
+function drawCard(){
+  document.getElementById('draw-btn').style.display='none';
+  const idx=Math.floor(Math.random()*C.eventCards.length);
+  G.eventCard=C.eventCards[idx];
+
+  // Animate cards
+  const cards=document.querySelectorAll('.gacha-card');
+  let delay=0;
+  cards.forEach((c,i)=>{
+    setTimeout(()=>c.classList.add('flipped'),delay);
+    delay+=120;
+  });
+
+  setTimeout(()=>{
+    cards[idx].classList.add('selected');
+    showDrawResult(G.eventCard);
+  },delay+200);
+}
+
+function showDrawResult(ec){
+  const el=document.getElementById('draw-result');
+  el.style.display='block';
+  el.innerHTML=`
+    <div class="ec-reveal" style="border-color:${ec.color};background:${ec.color}22">
+      <div class="ec-reveal-emoji">${ec.e}</div>
+      <div class="ec-reveal-name">${ec.name}</div>
+      <div class="ec-reveal-desc">${ec.desc}</div>
+      <div class="ec-reveal-hint"><strong>Petunjuk Adaptasi:</strong> ${ec.adapt}</div>
+      <div class="ec-targets">
+        <div style="font-size:12px;font-weight:700;color:var(--warn);margin-bottom:6px">Target LA Diagnosis:</div>
+        ${ec.targets.map((t,i)=>`<div class="ec-target-item">① ${t}</div>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('adapt-btn').style.display='inline-block';
+}
+
+function startAdapt(){
+  // Copy P1 decisions to P2
+  G.p2d=JSON.parse(JSON.stringify(G.p1d));
+  G.startTime=Date.now(); // reset timer for P2
+  currentTab='venue';
+  buildPlanning();
+  showScreen('planning');
+}
+
+// ══════════════════════════════════════════════════════
+// UI – FINAL REPORT
+// ══════════════════════════════════════════════════════
+function showFinalReport(){
+  const s1=G.p1s, s2=G.p2s;
+  const ec=G.eventCard;
+
+  document.getElementById('final-score').textContent=s2?s2.total:s1.total;
+  document.getElementById('grade-label').textContent=gradeLabel(s2?s2.total:s1.total);
+
+  // Final competency table
+  document.getElementById('final-table').innerHTML=`
+    <table class="final-comp-table">
+      <thead><tr><th>Kompetensi</th><th>Fase 1 (/25)</th>${ec?'<th>Fase 2 (/20)</th>':''}</tr></thead>
+      <tbody>
+        <tr><td>Systems Thinking</td><td>${s1.st}</td>${ec?`<td>${s2.st}</td>`:''}</tr>
+        <tr><td>Strategic Planning</td><td>${s1.sp}</td>${ec?`<td>${s2.sp}</td>`:''}</tr>
+        <tr><td>Resource Stewardship</td><td>${s1.rs}</td>${ec?`<td>${s2.rs}</td>`:''}</tr>
+        <tr><td>Decisiveness</td><td>${s1.dec}</td>${ec?`<td>${s2.dec}</td>`:''}</tr>
+        ${ec?`<tr><td>Learning Agility</td><td>—</td><td>${s2.la}</td></tr>`:''}
+        <tr style="font-weight:700;font-size:16px"><td>TOTAL</td><td>${s1.total}/100</td>${ec?`<td>${s2.total}/100</td>`:''}</tr>
+      </tbody>
+    </table>`;
+
+  if(ec){
+    document.getElementById('la-detail-box').style.display='block';
+    const la=s2.la_detail;
+    document.getElementById('la-detail').innerHTML=`
+      <div class="section-title">Learning Agility Detail — ${ec.e} ${ec.name}</div>
+      <div class="c-item"><span>① Diagnosis (target variabel tepat)</span><span class="c-badge ${la.diag>=4?'ok':'fail'}">${la.diag}/8</span></div>
+      <div class="c-item"><span>② Efisiensi Relatif (net revenue delta)</span><span class="c-badge ${la.eff>=8?'ok':'fail'}">${la.eff}/12</span></div>
+      <div class="c-item"><span>③ Constraint Integrity (delta n_pass)</span><span class="c-badge ${la.integ>=3?'ok':'fail'}">${la.integ}/5</span></div>
+      <div class="c-item" style="font-weight:700"><span>Total LA (×0.8 = ${Math.round(la.total*0.8)} poin final)</span><span class="c-badge ok">${la.total}/25</span></div>`;
+  } else {
+    document.getElementById('la-detail-box').style.display='none';
+  }
+
+  // Final radar
+  const labels=['ST','SP','RS','Dec'];
+  const vals=s2?[s2.st,s2.sp,s2.rs,s2.dec]:[s1.st,s1.sp,s1.rs,s1.dec];
+  if(s2){labels.push('LA');vals.push(s2.la);}
+  const maxV=s2?20:25;
+  drawRadar(document.getElementById('final-radar'),vals,labels,maxV);
+
+  document.getElementById('final-p2-heading').style.display=ec?'block':'none';
+  document.querySelectorAll('.final-ec-note').forEach(e=>e.style.display=ec?'block':'none');
+  document.getElementById('final-report').querySelector('p').textContent=
+    ec?`Skor Fase 1 (tanpa EC): ${s1.total}/100  |  Skor Fase 2 (dengan ${ec.name}): ${s2.total}/100`
+      :'Skor Fase 1 (tanpa Event Card)';
+
+  showScreen('final');
 }
 
 function restartGame(){
-  G = {round:0, history:[], allResults:null, decisions:DEFAULT_DECISIONS()};
-  Object.assign(activeOpts, {marketing:'medium'});
-  renderBriefing();
+  G={phase:1,eventCard:null,startTime:null,p1time:0,p1d:makeDecisions(),p2d:makeDecisions(),p1r:null,p2r:null,p1s:null,p2s:null};
+  buildBriefing();
   showScreen('briefing');
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// RADAR CHART
+// ══════════════════════════════════════════════════════
+function drawRadar(canvas,vals,labels,maxVal){
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  const cx=W/2,cy=H/2,r=Math.min(cx,cy)-32;
+  const n=vals.length;
+  ctx.clearRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle='rgba(30,48,72,.6)';ctx.lineWidth=1;
+  [0.25,0.5,0.75,1].forEach(f=>{
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const a=Math.PI*2*i/n-Math.PI/2;
+      const x=cx+r*f*Math.cos(a),y=cy+r*f*Math.sin(a);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();ctx.stroke();
+  });
+
+  // Axes
+  for(let i=0;i<n;i++){
+    const a=Math.PI*2*i/n-Math.PI/2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
+    ctx.strokeStyle='rgba(30,48,72,.6)';ctx.stroke();
+  }
+
+  // Data
+  ctx.beginPath();
+  vals.forEach((v,i)=>{
+    const a=Math.PI*2*i/n-Math.PI/2,f=v/maxVal;
+    const x=cx+r*f*Math.cos(a),y=cy+r*f*Math.sin(a);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle='rgba(14,165,233,.18)';ctx.fill();
+  ctx.strokeStyle='var(--primary)';ctx.lineWidth=2;ctx.stroke();
+
+  // Labels
+  ctx.fillStyle='var(--text)';ctx.font='bold 11px var(--font)';ctx.textAlign='center';ctx.textBaseline='middle';
+  labels.forEach((l,i)=>{
+    const a=Math.PI*2*i/n-Math.PI/2;
+    const d=r+20;
+    ctx.fillText(l,cx+d*Math.cos(a),cy+d*Math.sin(a));
+  });
+}
+
+// ══════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 window.addEventListener('load',()=>{
-  renderBriefing();
-  showScreen('briefing');
+  buildBriefing();
+  // Sync slider display values on load
+  document.querySelectorAll('input[type=range]').forEach(el=>{
+    const sv=document.getElementById('sv-'+el.id);
+    if(sv) sv.textContent=el.value;
+  });
 });

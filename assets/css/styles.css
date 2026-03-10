@@ -286,13 +286,74 @@ canvas.radar{border-radius:10px}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e3048;border:1px solid var(--warn);color:var(--warn);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;max-width:480px;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ── EVENT CARD BANNER ── */
+.ec-banner{background:#1a0e00;border-bottom:2px solid var(--warn);padding:10px 24px;position:sticky;top:57px;z-index:90}
+.ec-banner-inner{max-width:100%;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.ec-banner-title{font-size:15px;font-weight:800;color:var(--warn);flex-shrink:0;white-space:nowrap}
+.ec-banner-desc{font-size:12px;color:#fcd34d;flex:1}
+.ec-banner-adapt{font-size:12px;color:var(--muted);flex:1}
+
+/* ── EXTRA CHECK ITEMS ── */
+.extra-check-item{display:flex;align-items:flex-start;gap:12px;cursor:pointer;font-size:13px;background:var(--card2);padding:12px;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;transition:border-color .2s}
+.extra-check-item:hover{border-color:var(--primary)}
+.extra-check-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary);flex-shrink:0;margin-top:2px}
+.extra-name{font-weight:600;margin-bottom:2px}
+.extra-hint{font-size:11px;color:var(--muted);line-height:1.4}
+
+/* ── POWER STATUS GRID ── */
+.power-status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.power-stat{background:#0a1628;border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.ps-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.ps-val{font-size:16px;font-weight:700}
+
+/* ── GACHA EVENT CARD ── */
+.gacha-grid{display:flex;gap:14px;justify-content:center;perspective:800px;flex-wrap:wrap}
+.gacha-card{width:90px;height:130px;position:relative;cursor:default;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,0,.2,1)}
+.gacha-card.flipped{transform:rotateY(180deg)}
+.gacha-card.selected{box-shadow:0 0 0 3px var(--warn),0 0 24px rgba(245,158,11,.4);transform:rotateY(180deg) scale(1.08)}
+.gc-front,.gc-back{position:absolute;inset:0;border-radius:12px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;font-size:32px;font-weight:800}
+.gc-front{background:linear-gradient(135deg,#1e3a5f,#0f1e30);border:2px solid var(--border);color:var(--muted);font-size:24px}
+.gc-back{transform:rotateY(180deg);border:2px solid var(--warn)}
+.gc-c01{background:linear-gradient(135deg,#1e3a8a,#1e40af)}
+.gc-s01{background:linear-gradient(135deg,#3b0764,#5b21b6)}
+.gc-l01{background:linear-gradient(135deg,#450a0a,#991b1b)}
+.gc-a01{background:linear-gradient(135deg,#451a03,#92400e)}
+.gc-k01{background:linear-gradient(135deg,#022c22,#064e3b)}
+
+/* ── EVENT CARD REVEAL ── */
+.ec-reveal{border:2px solid;border-radius:14px;padding:24px;text-align:left;margin:0 auto;max-width:500px}
+.ec-reveal-emoji{font-size:48px;margin-bottom:10px;text-align:center}
+.ec-reveal-name{font-size:22px;font-weight:800;text-align:center;margin-bottom:12px}
+.ec-reveal-desc{font-size:14px;line-height:1.6;margin-bottom:12px}
+.ec-reveal-hint{font-size:13px;background:rgba(0,0,0,.3);padding:10px 14px;border-radius:8px;margin-bottom:12px;line-height:1.5}
+.ec-targets{margin-top:8px}
+.ec-target-item{font-size:12px;color:var(--warn);padding:4px 0;border-bottom:1px solid rgba(245,158,11,.2)}
+.ec-target-item:last-child{border-bottom:none}
+
+/* ── FINAL REPORT TABLE ── */
+.final-comp-table{width:100%;border-collapse:collapse;font-size:14px}
+.final-comp-table th{text-align:left;padding:10px 12px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.final-comp-table td{padding:10px 12px;border-bottom:1px solid rgba(30,48,72,.5)}
+.final-comp-table tr:last-child td{border-bottom:none}
+
+/* ── VC-WARN in venue cards ── */
+.vc-warn{display:block}
+
+/* ── RS-BARS layout fix ── */
+#rs-bars .comp-row{flex-wrap:wrap;gap:6px}
+#rs-bars .comp-row>div:last-child{width:100%}
+
 @media(max-width:900px){
   .planning-layout{grid-template-columns:1fr;height:auto}
   .preview-panel{border-left:none;border-top:1px solid var(--border)}
   .results-grid{grid-template-columns:1fr 1fr}
   .venue-cards-grid{grid-template-columns:1fr}
+  .power-status-grid{grid-template-columns:repeat(2,1fr)}
+  .gacha-grid{gap:10px}
+  .gacha-card{width:72px;height:104px}
 }
 @media(max-width:600px){
   .hero-title{font-size:26px}.results-grid{grid-template-columns:1fr}
-  .steps .step span{display:none}.round-history{grid-template-columns:1fr}
+  .steps .step span{display:none}
+  .gacha-card{width:58px;height:84px}.gc-front,.gc-back{font-size:20px}
 }
