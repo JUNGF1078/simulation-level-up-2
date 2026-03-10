@@ -87,10 +87,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .venue-slot-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .venue-slot-header span{font-size:12px;font-weight:600;color:var(--primary)}
 
-/* RANGE SLIDER */
-.slider-wrap{display:flex;align-items:center;gap:10px}
-.slider-wrap input[type=range]{flex:1;accent-color:var(--primary)}
-.slider-val{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:13px;font-weight:600;color:var(--text);min-width:40px;text-align:center}
+/* RANGE SLIDER (unused — kept for reference) */
 
 /* TOGGLE BUTTON GROUP */
 .btn-group{display:flex;gap:6px;flex-wrap:wrap}
@@ -299,6 +296,16 @@ canvas.radar{border-radius:10px}
 .extra-check-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary);flex-shrink:0;margin-top:2px}
 .extra-name{font-weight:600;margin-bottom:2px}
 .extra-hint{font-size:11px;color:var(--muted);line-height:1.4}
+
+/* ── NUMBER INPUT ── */
+.num-input-row{}
+.num-wrap{display:flex;align-items:center;gap:6px;margin-top:6px}
+.num-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;line-height:1;transition:.15s;flex-shrink:0}
+.num-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff}
+.num-wrap input[type=number]{width:64px;text-align:center;background:#0a1628;border:1px solid var(--border);border-radius:7px;padding:6px 8px;color:var(--text);font-size:15px;font-weight:700;outline:none;-moz-appearance:textfield}
+.num-wrap input[type=number]::-webkit-inner-spin-button,.num-wrap input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+.num-wrap input[type=number]:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+.num-unit{font-size:12px;color:var(--text);font-weight:600}
 
 /* ── POWER STATUS GRID ── */
 .power-status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}

@@ -761,12 +761,14 @@ function renderOpTab(){
 }
 
 function buildSlider(key,val,min,max,label,unit){
-  return `<div class="form-group" style="margin-bottom:14px">
+  return `<div class="form-group num-input-row" style="margin-bottom:14px">
     <label style="font-size:12px;color:var(--muted);font-weight:600">${label}</label>
-    <div class="slider-wrap">
-      <input type="range" min="${min}" max="${max}" value="${val}"
-        oninput="setExtra('${key}',+this.value);document.getElementById('sv-${key}').textContent=this.value">
-      <div class="slider-val" id="sv-${key}">${val} ${unit}</div>
+    <div class="num-wrap">
+      <button class="num-btn" onclick="setExtra('${key}',Math.max(${min},+(document.getElementById('ni-${key}').value||0)-1));document.getElementById('ni-${key}').value=D().${key}">−</button>
+      <input type="number" id="ni-${key}" min="${min}" max="${max}" value="${val}"
+        oninput="setExtra('${key}',+clamp(+this.value,${min},${max}));this.value=D().${key}">
+      <button class="num-btn" onclick="setExtra('${key}',Math.min(${max},+(document.getElementById('ni-${key}').value||0)+1));document.getElementById('ni-${key}').value=D().${key}">+</button>
+      <span class="num-unit">${unit} <span style="color:var(--muted);font-weight:400">/ maks ${max}</span></span>
     </div>
   </div>`;
 }
@@ -1234,9 +1236,4 @@ function drawRadar(canvas,vals,labels,maxVal){
 // ══════════════════════════════════════════════════════
 window.addEventListener('load',()=>{
   buildBriefing();
-  // Sync slider display values on load
-  document.querySelectorAll('input[type=range]').forEach(el=>{
-    const sv=document.getElementById('sv-'+el.id);
-    if(sv) sv.textContent=el.value;
-  });
 });
