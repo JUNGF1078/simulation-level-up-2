@@ -734,8 +734,8 @@ function renderOpTab(){
         Dibutuhkan: <strong class="text-warn">${tReq}</strong> unit (≥ penonton÷100) &nbsp;|&nbsp;
         Total kamu: <strong class="${r&&r.toiletsTotal>=tReq?'text-accent':'text-danger'}">${r?r.toiletsTotal:0}</strong>
       </div>
-      ${buildSlider('toilet10',d.toilet10,0,5,'Pak 10 unit — Rp 22jt/pak','pak')}
-      ${buildSlider('toilet5',d.toilet5,0,10,'Pak 5 unit — Rp 12jt/pak','pak')}
+      ${buildSlider('toilet10',d.toilet10,0,30,'Pak 10 unit — Rp 22jt/pak','pak')}
+      ${buildSlider('toilet5',d.toilet5,0,30,'Pak 5 unit — Rp 12jt/pak','pak')}
     </div>
 
     <div class="section-card">
@@ -744,7 +744,7 @@ function renderOpTab(){
         Dibutuhkan: <strong class="text-warn">${sReq}</strong> org (≥ max(10, penonton÷200)) &nbsp;|&nbsp;
         Kamu beli: <strong class="${r&&r.securityTotal>=sReq?'text-accent':'text-danger'}">${d.security*10}</strong> org
       </div>
-      ${buildSlider('security',d.security,0,20,'Pak 10 org — Rp 15jt/pak','pak')}
+      ${buildSlider('security',d.security,0,30,'Pak 10 org — Rp 15jt/pak','pak')}
     </div>
 
     <div class="section-card">
@@ -1175,8 +1175,8 @@ function showFinalReport(){
 
   document.getElementById('final-p2-heading').style.display=ec?'block':'none';
   document.querySelectorAll('.final-ec-note').forEach(e=>e.style.display=ec?'block':'none');
-  document.getElementById('final').querySelector('.final-header p').textContent=
-    ec?`Skor Fase 1: ${s1.total}/100  |  Skor Fase 2 (${ec.name}): ${s2.total}/100`
+  document.getElementById('final-phase-label').textContent=
+    ec?`Skor Fase 1: ${s1.total}/100  |  Skor Fase 2 (${ec.name}): ${s2?s2.total:'—'}/100`
       :'Skor Fase 1 (tanpa Event Card)';
 
   showScreen('final');
