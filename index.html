@@ -165,7 +165,10 @@
         <div class="hero-tag" id="results-round-label">Fase 1 — Hasil</div>
         <h2 style="font-size:22px;font-weight:700">Dashboard Performa</h2>
       </div>
-      <button class="btn btn-primary" id="next-round-btn" onclick="showEventCard()">Tarik Event Card →</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-accent" onclick="exportCSV()">⬇ Export CSV</button>
+        <button class="btn btn-primary" id="next-round-btn" onclick="showEventCard()">Tarik Event Card →</button>
+      </div>
     </div>
 
     <div class="results-grid" id="score-cards"></div>
@@ -260,7 +263,8 @@
       </div>
     </div>
 
-    <div style="text-align:center;margin-top:24px">
+    <div style="text-align:center;margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-accent btn-lg" onclick="exportCSV()">⬇ Export CSV</button>
       <button class="btn btn-primary btn-lg" onclick="restartGame()">Main Lagi</button>
     </div>
   </div>

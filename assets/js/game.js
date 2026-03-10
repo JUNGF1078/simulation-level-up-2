@@ -108,7 +108,7 @@ const makeDecisions = () => ({
 
 let G = {
   phase:1, eventCard:null,
-  startTime:null, p1time:0,
+  startTime:null, p1time:0, p2time:0,
   p1d:makeDecisions(), p2d:makeDecisions(),
   p1r:null, p2r:null,
   p1s:null, p2s:null,
@@ -843,7 +843,7 @@ function runSimulation(){
     G.p1r=r; G.p1time=timeMin;
     G.p1s=scorePhase(r,timeMin);
   } else {
-    G.p2r=r;
+    G.p2r=r; G.p2time=timeMin;
     const la=calcLA(ec,G.p1d,d,G.p1r,r);
     G.p2s=scoreWithEC(r,timeMin,la);
   }
@@ -929,7 +929,7 @@ function showResults(){
     {label:'Systems Thinking',val:isP2?s.st:s.st,max:isP2?20:25,cls:s.st>=(isP2?16:20)?'good':s.st<(isP2?8:10)?'bad':'warn',sub:`${Object.values(r.constraints).filter(Boolean).length}/6 constraint lulus`},
     {label:'Strategic Planning',val:isP2?s.sp:s.sp,max:isP2?20:25,cls:s.sp>=(isP2?15:20)?'good':s.sp<(isP2?8:10)?'bad':'warn',sub:`Margin ${r.margin.toFixed(1)}%`},
     {label:'Resource Stewardship',val:isP2?s.rs:s.rs,max:isP2?20:25,cls:s.rs>=(isP2?16:20)?'good':s.rs<(isP2?8:10)?'bad':'warn',sub:`RS Total ${r.totalRS}/25`},
-    {label:'Decisiveness',val:isP2?s.dec:s.dec,max:isP2?20:25,cls:s.dec>=(isP2?15:20)?'good':s.dec<(isP2?8:10)?'bad':'warn',sub:`Waktu: ${G.phase===1?G.p1time.toFixed(1):(elapsedMin()).toFixed(1)} mnt`},
+    {label:'Decisiveness',val:s.dec,max:isP2?20:25,cls:s.dec>=(isP2?15:20)?'good':s.dec<(isP2?8:10)?'bad':'warn',sub:`Waktu: ${isP2?G.p2time.toFixed(1):G.p1time.toFixed(1)} mnt`},
   ];
   if(isP2){
     const la=s.la_detail;
@@ -1005,6 +1005,13 @@ function showResults(){
   drawRadar(document.getElementById('radar-canvas'),vals,labels,maxV);
 
   showScreen('results');
+  // Phase 2 results: override step to "Laporan" (index 4) since Event Card phase is done
+  if(isP2){
+    document.querySelectorAll('.step').forEach((s,i)=>{
+      s.classList.toggle('active',i===4);
+      s.classList.toggle('done',i<4);
+    });
+  }
 }
 
 function buildBars(id,items,total,color){
@@ -1168,15 +1175,15 @@ function showFinalReport(){
 
   document.getElementById('final-p2-heading').style.display=ec?'block':'none';
   document.querySelectorAll('.final-ec-note').forEach(e=>e.style.display=ec?'block':'none');
-  document.getElementById('final-report').querySelector('p').textContent=
-    ec?`Skor Fase 1 (tanpa EC): ${s1.total}/100  |  Skor Fase 2 (dengan ${ec.name}): ${s2.total}/100`
+  document.getElementById('final').querySelector('.final-header p').textContent=
+    ec?`Skor Fase 1: ${s1.total}/100  |  Skor Fase 2 (${ec.name}): ${s2.total}/100`
       :'Skor Fase 1 (tanpa Event Card)';
 
   showScreen('final');
 }
 
 function restartGame(){
-  G={phase:1,eventCard:null,startTime:null,p1time:0,p1d:makeDecisions(),p2d:makeDecisions(),p1r:null,p2r:null,p1s:null,p2s:null};
+  G={phase:1,eventCard:null,startTime:null,p1time:0,p2time:0,p1d:makeDecisions(),p2d:makeDecisions(),p1r:null,p2r:null,p1s:null,p2s:null};
   buildBriefing();
   showScreen('briefing');
 }
@@ -1229,6 +1236,201 @@ function drawRadar(canvas,vals,labels,maxVal){
     const d=r+20;
     ctx.fillText(l,cx+d*Math.cos(a),cy+d*Math.sin(a));
   });
+}
+
+// ══════════════════════════════════════════════════════
+// EXPORT CSV
+// ══════════════════════════════════════════════════════
+function exportCSV(){
+  if(!G.p1r || !G.p1s){ showToast('Jalankan simulasi dulu sebelum export.'); return; }
+
+  const rows=[];
+  const row=(...cols)=>rows.push(cols.map(c=>{
+    const s=String(c??'');
+    return (s.includes(',')||s.includes('"')||s.includes('\n'))
+      ?'"'+s.replace(/"/g,'""')+'"':s;
+  }).join(','));
+  const sep=t=>{rows.push('');row('=== '+t+' ===');};
+
+  const p1d=G.p1d,p1r=G.p1r,p1s=G.p1s;
+  const p2d=G.p2d,p2r=G.p2r,p2s=G.p2s;
+  const ec=G.eventCard;
+  const hasP2=!!(ec&&p2r&&p2s);
+
+  // A. IDENTITAS
+  sep('A. IDENTITAS');
+  row('Venue',p1d.venue?C.venues[p1d.venue].name:'—');
+  row('Sub Venue',p1d.venue?C.venues[p1d.venue].sub:'—');
+  row('Fase Dimainkan',hasP2?'Phase 1 + Phase 2 (Event Card)':'Phase 1 Only');
+  row('Event Card',ec?ec.e+' '+ec.name:'—');
+  row('Waktu Planning P1 (mnt)',G.p1time.toFixed(1));
+
+  // B. CABOR DIPILIH
+  sep('B. CABOR DIPILIH');
+  row('Cabang Olahraga','kW','Biaya Base (jt)','Tiket (rb)','pBase','oBase','Compat P1',hasP2?'Compat P2':'');
+  p1r.caborDetails.forEach(cd=>{
+    const c=C.cabor.find(x=>x.id===cd.id);
+    const p2cd=hasP2?p2r.caborDetails.find(x=>x.id===cd.id):null;
+    row(cd.name,c.kW,c.biaya,c.tiket,c.pBase,c.oBase,
+      cd.compat?'Kompatibel':'Inkompatibel',
+      p2cd?(p2cd.compat?'Kompatibel':'Inkompatibel'):'');
+  });
+  row('Total Cabor Dipilih',p1d.cabor.length,hasP2?p2d.cabor.length:'');
+  row('Cabor Inkompatibel',p1r.nIncompat,hasP2?p2r.nIncompat:'');
+
+  // C. LISTRIK
+  sep('C. LISTRIK');
+  row('','Fase 1',hasP2?'Fase 2':'');
+  row('kW Cabor',p1r.kWCabor,hasP2?p2r.kWCabor:'');
+  row('kW Extras',p1r.kWExtras,hasP2?p2r.kWExtras:'');
+  row('kW Total Digunakan',p1r.kWTotal,hasP2?p2r.kWTotal:'');
+  row('kW Venue',p1r.kWVenue,hasP2?p2r.kWVenue:'');
+  row('kW Genset',p1r.kWGenset,hasP2?p2r.kWGenset:'');
+  row('kW Tersedia (Venue+Genset)',p1r.kWAvail,hasP2?p2r.kWAvail:'');
+  row('kW Deficit',p1r.kWDeficit,hasP2?p2r.kWDeficit:'');
+  row('Blackout',p1r.blackout?'YA':'Tidak',hasP2?(p2r.blackout?'YA':'Tidak'):'');
+
+  // D. OPERASIONAL
+  sep('D. OPERASIONAL');
+  row('','Fase 1',hasP2?'Fase 2':'');
+  row('Genset Kecil (unit)',p1d.gensetKecil,hasP2?p2d.gensetKecil:'');
+  row('Genset Besar (unit)',p1d.gensetBesar,hasP2?p2d.gensetBesar:'');
+  row('Toilet 5-unit (set)',p1d.toilet5,hasP2?p2d.toilet5:'');
+  row('Toilet 10-unit (set)',p1d.toilet10,hasP2?p2d.toilet10:'');
+  row('Toilet Total (unit)',p1r.toiletsTotal,hasP2?p2r.toiletsTotal:'');
+  row('Toilet Dibutuhkan',p1r.toiletsReq,hasP2?p2r.toiletsReq:'');
+  row('Security (regu)',p1d.security,hasP2?p2d.security:'');
+  row('Security Total (org)',p1r.securityTotal,hasP2?p2r.securityTotal:'');
+  row('Security Dibutuhkan',p1r.securityReq,hasP2?p2r.securityReq:'');
+  row('Tim Medis',p1d.medis?'Dibeli':'Tidak',hasP2?(p2d.medis?'Dibeli':'Tidak'):'');
+
+  // E. ADD-ONS & EXTRAS
+  sep('E. ADD-ONS & EXTRAS');
+  row('','Fase 1',hasP2?'Fase 2':'');
+  row('Broadcasting Paket',p1d.bc?'Ya':'Tidak',hasP2?(p2d.bc?'Ya':'Tidak'):'');
+  row('Broadcasting Built-in Venue',C.venues[p1d.venue]?.bc?'Ya':'Tidak',hasP2?(C.venues[p2d.venue]?.bc?'Ya':'Tidak'):'');
+  row('Streaming Upgrade',p1d.streaming?'Ya':'Tidak',hasP2?(p2d.streaming?'Ya':'Tidak'):'');
+  row('Opening Ceremony',p1d.opening?'Ya':'Tidak',hasP2?(p2d.opening?'Ya':'Tidak'):'');
+  row('Closing Ceremony',p1d.closing?'Ya':'Tidak',hasP2?(p2d.closing?'Ya':'Tidak'):'');
+  row('Food Stall (unit)',p1d.foodStall,hasP2?p2d.foodStall:'');
+  row('Food Truck (unit)',p1d.foodTruck,hasP2?p2d.foodTruck:'');
+  row('Booth Sponsor (unit)',p1d.boothSponsor,hasP2?p2d.boothSponsor:'');
+  row('MSA (Multi-Screen Area)',p1d.msa?'Ya':'Tidak',hasP2?(p2d.msa?'Ya':'Tidak'):'');
+
+  // F. KALKULASI OTOMATIS
+  sep('F. KALKULASI OTOMATIS (Rp Juta)');
+  row('','Fase 1',hasP2?'Fase 2':'');
+  row('Penonton Offline',Math.round(p1r.poffSum),hasP2?Math.round(p2r.poffSum):'');
+  row('Penonton Online',Math.round(p1r.ponSum),hasP2?Math.round(p2r.ponSum):'');
+  row('Total Viewers',Math.round(p1r.totalViewers),hasP2?Math.round(p2r.totalViewers):'');
+  row('Sponsor Tier',C.sponsorTiers[p1r.sponsorIdx].tier,hasP2?C.sponsorTiers[p2r.sponsorIdx].tier:'');
+  row('Revenue Tiket',Math.round(p1r.revTiket),hasP2?Math.round(p2r.revTiket):'');
+  row('Revenue Sponsor',p1r.revSponsor,hasP2?p2r.revSponsor:'');
+  row('Revenue Food Stall',Math.round(p1r.revFoodStall),hasP2?Math.round(p2r.revFoodStall):'');
+  row('Revenue Food Truck',Math.round(p1r.revFoodTruck),hasP2?Math.round(p2r.revFoodTruck):'');
+  row('Revenue Booth',Math.round(p1r.revBooth),hasP2?Math.round(p2r.revBooth):'');
+  row('TOTAL REVENUE',Math.round(p1r.totalRev),hasP2?Math.round(p2r.totalRev):'');
+  row('Biaya Venue',p1r.costVenue,hasP2?p2r.costVenue:'');
+  row('Biaya Cabor',Math.round(p1r.costCabor),hasP2?Math.round(p2r.costCabor):'');
+  row('Biaya Extras',Math.round(p1r.costExtras),hasP2?Math.round(p2r.costExtras):'');
+  row('TOTAL COST',Math.round(p1r.totalCost),hasP2?Math.round(p2r.totalCost):'');
+  row('PROFIT',Math.round(p1r.profit),hasP2?Math.round(p2r.profit):'');
+  row('Margin (%)',p1r.margin.toFixed(1),hasP2?p2r.margin.toFixed(1):'');
+
+  // G. 6 CONSTRAINT
+  sep('G. 6 CONSTRAINT');
+  row('Constraint','Fase 1',hasP2?'Fase 2':'');
+  [['listrik','Listrik'],['toilet','Toilet'],['security','Security'],
+   ['cabor','Cabor'],['medis','Tim Medis'],['budget','Budget']].forEach(([k,n])=>{
+    row(n,p1r.constraints[k]?'LULUS':'GAGAL',hasP2?(p2r.constraints[k]?'LULUS':'GAGAL'):'');
+  });
+  row('Jumlah Constraint Lulus (n_pass)',p1r.nPass,hasP2?p2r.nPass:'');
+
+  // H. RESOURCE STEWARDSHIP
+  sep('H. RESOURCE STEWARDSHIP DETAIL (/5 per sub)');
+  row('Sub-komponen','Fase 1','Maks',hasP2?'Fase 2':'');
+  row('Toilet (rasio)',p1r.rs_toilet,5,hasP2?p2r.rs_toilet:'');
+  row('Security (rasio)',p1r.rs_security,5,hasP2?p2r.rs_security:'');
+  row('Listrik (genset decision)',p1r.rs_listrik,5,hasP2?p2r.rs_listrik:'');
+  row('Budget (sisa)',p1r.rs_budget,5,hasP2?p2r.rs_budget:'');
+  row('F&B (catchment)',p1r.rs_fb,5,hasP2?p2r.rs_fb:'');
+  row('TOTAL RS',p1r.totalRS,25,hasP2?p2r.totalRS:'');
+  row('Catchment Ratio',p1r.catchRatio.toFixed(2),'',hasP2?p2r.catchRatio.toFixed(2):'');
+  row('Toilet Ratio',p1r.toiletsReq>0?(p1r.toiletsTotal/p1r.toiletsReq).toFixed(2):'N/A','',
+    hasP2?(p2r.toiletsReq>0?(p2r.toiletsTotal/p2r.toiletsReq).toFixed(2):'N/A'):'');
+  row('Security Ratio',(p1r.securityTotal/Math.max(p1r.securityReq,1)).toFixed(2),'',
+    hasP2?(p2r.securityTotal/Math.max(p2r.securityReq,1)).toFixed(2):'');
+
+  // I. SKOR FASE 1
+  sep('I. SKOR FASE 1 (/100)');
+  row('Kompetensi','Skor','Maks');
+  row('Systems Thinking (n_pass constraint)',p1s.st,25);
+  row('Strategic Planning (margin %)',p1s.sp,25);
+  row('Resource Stewardship',p1s.rs,25);
+  row('Decisiveness (waktu × n_pass)',p1s.dec,25);
+  row('TOTAL FASE 1',p1s.total,100);
+  row('Grade',gradeLabel(p1s.total).replace(/[🏆🥈🥉📉❌]/g,'').trim());
+
+  if(hasP2){
+    // J. EVENT CARD
+    sep('J. EVENT CARD');
+    row('Kartu',ec.e+' '+ec.name);
+    row('Deskripsi',ec.desc);
+    row('Target Adaptasi 1',ec.targets[0]);
+    row('Target Adaptasi 2',ec.targets[1]);
+
+    // K. PERUBAHAN KEPUTUSAN P1 → P2
+    sep('K. PERUBAHAN KEPUTUSAN P1 → P2');
+    row('Parameter','Fase 1','Fase 2','Delta');
+    const numChg=(lbl,v1,v2)=>row(lbl,v1,v2,v2-v1>0?'+'+(v2-v1):String(v2-v1));
+    const boolChg=(lbl,v1,v2)=>row(lbl,v1?'Ya':'Tidak',v2?'Ya':'Tidak',v1===v2?'—':(v1?'Ya→Tidak':'Tidak→Ya'));
+    numChg('Genset Kecil',p1d.gensetKecil,p2d.gensetKecil);
+    numChg('Genset Besar',p1d.gensetBesar,p2d.gensetBesar);
+    numChg('Toilet 5-unit',p1d.toilet5,p2d.toilet5);
+    numChg('Toilet 10-unit',p1d.toilet10,p2d.toilet10);
+    numChg('Security (regu)',p1d.security,p2d.security);
+    numChg('Food Stall',p1d.foodStall,p2d.foodStall);
+    numChg('Food Truck',p1d.foodTruck,p2d.foodTruck);
+    numChg('Booth Sponsor',p1d.boothSponsor,p2d.boothSponsor);
+    boolChg('Streaming Upgrade',p1d.streaming,p2d.streaming);
+    boolChg('MSA',p1d.msa,p2d.msa);
+    boolChg('Opening Ceremony',p1d.opening,p2d.opening);
+    boolChg('Closing Ceremony',p1d.closing,p2d.closing);
+
+    // M. LEARNING AGILITY
+    sep('M. LEARNING AGILITY DETAIL');
+    const la=p2s.la_detail;
+    row('Sub-komponen','Skor Raw','Maks','Skor ×0.8');
+    row('Diagnosis (target variabel tepat)',la.diag,8,Math.round(la.diag*0.8));
+    row('Efisiensi Relatif (net rev delta)',la.eff,12,Math.round(la.eff*0.8));
+    row('Constraint Integrity (delta n_pass)',la.integ,5,Math.round(la.integ*0.8));
+    row('TOTAL LA',la.total,25,Math.round(la.total*0.8));
+
+    // N. SKOR FASE 2
+    sep('N. SKOR FASE 2 (/100 — semua ×0.8)');
+    row('Kompetensi','Skor Raw (/25)','Skor ×0.8 (/20)');
+    row('Systems Thinking',p2s.raw.st,p2s.st);
+    row('Strategic Planning',p2s.raw.sp,p2s.sp);
+    row('Resource Stewardship',p2s.raw.rs,p2s.rs);
+    row('Decisiveness',p2s.raw.dec,p2s.dec);
+    row('Learning Agility',la.total,p2s.la);
+    row('TOTAL FASE 2','—',p2s.total);
+    row('Grade',gradeLabel(p2s.total).replace(/[🏆🥈🥉📉❌]/g,'').trim());
+    rows.push('');
+    row('Perbandingan','Fase 1','Fase 2');
+    row('Total Skor',p1s.total,p2s.total);
+    row('Profit (Rp jt)',Math.round(p1r.profit),Math.round(p2r.profit));
+    row('n_pass Constraint',p1r.nPass,p2r.nPass);
+    row('Total Viewers',Math.round(p1r.totalViewers),Math.round(p2r.totalViewers));
+  }
+
+  const csv='\uFEFF'+rows.join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='level-up-score.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV berhasil didownload!');
 }
 
 // ══════════════════════════════════════════════════════
