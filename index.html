@@ -60,6 +60,16 @@
         <button class="tab-btn" data-tab="listrik" onclick="switchTab('listrik')">⚡ Listrik</button>
         <button class="tab-btn" data-tab="addons" onclick="switchTab('addons')">🎉 Add-ons</button>
         <button class="tab-btn" data-tab="operasional" onclick="switchTab('operasional')">🛡️ Operasional</button>
+        <button class="tab-btn tab-btn-help" onclick="toggleLangkahKerja()">📖 Langkah Kerja</button>
+      </div>
+
+      <!-- Langkah Kerja Overlay -->
+      <div id="langkah-kerja-panel" class="lk-panel" style="display:none">
+        <div class="lk-panel-header">
+          <span>📖 Langkah Kerja</span>
+          <button class="lk-close" onclick="toggleLangkahKerja()">&times;</button>
+        </div>
+        <div class="lk-panel-body" id="lk-body"></div>
       </div>
 
       <!-- TAB: VENUE -->

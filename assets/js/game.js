@@ -479,6 +479,16 @@ function buildBriefing(){
   `;
 }
 
+function toggleLangkahKerja(){
+  const panel=document.getElementById('langkah-kerja-panel');
+  if(panel.style.display==='none'){
+    document.getElementById('lk-body').innerHTML=document.getElementById('briefing-objectives').innerHTML;
+    panel.style.display='block';
+  } else {
+    panel.style.display='none';
+  }
+}
+
 function startPlanning(){
   G.phase=1;
   G.p1d=makeDecisions();
