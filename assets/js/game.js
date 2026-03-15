@@ -132,7 +132,7 @@ function showScreen(id){
 }
 
 function updateSteps(screenId){
-  const map={briefing:0,planning:1,simulation:1,results:2,'event-card':3,final:4};
+  const map={briefing:0,planning:1,simulation:1,results:2,final:3};
   const idx = map[screenId]??0;
   document.querySelectorAll('.step').forEach((s,i)=>{
     s.classList.toggle('active',i===idx);
@@ -448,17 +448,34 @@ function buildBriefing(){
     <div class="info-card"><div class="label">Durasi Sesi</div><div class="value">30</div><div class="unit">Menit</div></div>
     <div class="info-card"><div class="label">Venue Pilihan</div><div class="value">5</div><div class="unit">V1 – V5</div></div>
     <div class="info-card"><div class="label">Cabor Tersedia</div><div class="value">16</div><div class="unit">Min 5 pilih</div></div>
-    <div class="info-card"><div class="label">Fase</div><div class="value">2</div><div class="unit">Planning + Event Card</div></div>
   `;
   document.getElementById('briefing-objectives').innerHTML=`
-    <h3>Objektif</h3>
-    <div class="obj-item"><div class="obj-icon">💰</div>Raih profit positif (Total Revenue > Total Cost)</div>
-    <div class="obj-item"><div class="obj-icon">⚡</div>Jaga listrik: kW digunakan ≤ kapasitas venue + genset</div>
-    <div class="obj-item"><div class="obj-icon">🚽</div>Toilet ≥ 1 per 100 penonton offline aktual</div>
-    <div class="obj-item"><div class="obj-icon">🛡️</div>Security ≥ max(10, 1 per 200 penonton offline)</div>
-    <div class="obj-item"><div class="obj-icon">⚽</div>Pilih min. 5 cabor — semua harus kompatibel dengan venue</div>
-    <div class="obj-item"><div class="obj-icon">🏥</div>Tim Medis & P3K WAJIB dibeli (Rp 25jt)</div>
-    <div class="obj-item"><div class="obj-icon">🎴</div>Fase 2: Kartu Event ditarik secara acak — adaptasi keputusan Anda!</div>
+    <h3>Langkah Kerja</h3>
+    <div class="obj-item"><div class="obj-icon">1️⃣</div>Pilih 1 VENUE dari 5 opsi. Perhatikan biaya sewa, kapasitas listrik, fasilitas, dan tipe venue — venue menentukan cabor mana yang bisa digunakan.</div>
+    <div class="obj-item"><div class="obj-icon">2️⃣</div>Pilih minimal 5 CABANG OLAHRAGA. Pastikan cabor yang dipilih sesuai dengan fasilitas venue. Cabor yang tidak sesuai tetap dikenakan biaya tanpa menghasilkan penonton.</div>
+    <div class="obj-item"><div class="obj-icon">3️⃣</div>Beli EXTRAS & ADD-ONS sesuai kebutuhan: generator listrik, toilet portable, petugas keamanan, F&B, broadcasting, panggung hiburan, booth sponsor, tim medis, dll.</div>
+    <div class="obj-item"><div class="obj-icon">4️⃣</div>VERIFIKASI semua constraint wajib terpenuhi. Satu saja yang gagal bisa membatalkan sebagian atau seluruh event Anda.</div>
+    <div class="obj-item"><div class="obj-icon">5️⃣</div>SUBMIT rencana final sebelum waktu habis (30 menit).</div>
+
+    <h3 style="margin-top:20px">Sumber Pendapatan</h3>
+    <div class="obj-item"><div class="obj-icon">🎫</div><strong>Tiket:</strong> Setiap cabor menghasilkan penonton offline yang membeli tiket. Jumlah dan harga bervariasi per cabor, dikalikan rasio venue.</div>
+    <div class="obj-item"><div class="obj-icon">🤝</div><strong>Sponsor:</strong> Pendapatan berdasarkan total viewers (offline + online). Semakin banyak viewers, semakin tinggi tier sponsor.</div>
+    <div class="obj-item"><div class="obj-icon">🍔</div><strong>F&B:</strong> Food Stall dan Food Truck menghasilkan revenue, tapi dibatasi jumlah penonton yang bisa dilayani.</div>
+    <div class="obj-item"><div class="obj-icon">🏢</div><strong>Booth:</strong> Booth sponsor menghasilkan revenue berdasarkan total viewers. Terlalu banyak booth vs viewers menurunkan efektivitas.</div>
+
+    <h3 style="margin-top:20px">6 Constraint Wajib</h3>
+    <div class="obj-item"><div class="obj-icon">⚡</div><strong>Listrik</strong> — Kebutuhan listrik tidak boleh melebihi kapasitas.</div>
+    <div class="obj-item"><div class="obj-icon">🚽</div><strong>Toilet</strong> — Toilet harus mencukupi untuk penonton.</div>
+    <div class="obj-item"><div class="obj-icon">🛡️</div><strong>Keamanan</strong> — Petugas keamanan harus mencukupi.</div>
+    <div class="obj-item"><div class="obj-icon">⚽</div><strong>Cabor</strong> — Minimal 5 cabor, semua harus sesuai fasilitas venue.</div>
+    <div class="obj-item"><div class="obj-icon">🏥</div><strong>Medis</strong> — Tim Medis & P3K wajib dibeli.</div>
+    <div class="obj-item"><div class="obj-icon">💰</div><strong>Budget</strong> — Total pengeluaran tidak boleh melebihi Rp 3 miliar.</div>
+
+    <h3 style="margin-top:20px">Tips & Peringatan</h3>
+    <div class="obj-item"><div class="obj-icon">📖</div>Baca SEMUA data yang tersedia sebelum membuat keputusan. Informasi tersebar di beberapa tab.</div>
+    <div class="obj-item"><div class="obj-icon">🔗</div>Perhatikan INTERDEPENDENSI. Contoh: panggung hiburan menaikkan penonton → toilet & keamanan harus diupdate.</div>
+    <div class="obj-item"><div class="obj-icon">📊</div>Efisiensi lebih penting daripada kuantitas. Membeli terlalu banyak sama buruknya dengan terlalu sedikit.</div>
+    <div class="obj-item"><div class="obj-icon">⏱️</div>Waktu juga dinilai. Rencana yang tidak di-submit tepat waktu tetap dinilai berdasarkan waktu aktual.</div>
   `;
 }
 
@@ -523,7 +540,6 @@ function renderVenueTab(){
         <div class="vc-name">${v.name} <span class="tag tag-blue">${v.sub}</span>${locked&&sel?'<span class="tag tag-green" style="margin-left:4px">TERKUNCI</span>':''}</div>
         <div class="vc-badge ${sel?'sel':'unsel'}">${sel?'✓ Dipilih':'Pilih'}</div>
       </div>
-      <div class="vc-desc">${v.desc}</div>
       <div class="vc-attrs">
         <div class="vc-row"><span>Sewa</span><span class="vc-val">Rp ${fmt(v.cost)} jt</span></div>
         <div class="vc-row"><span>Listrik</span><span class="vc-val">${fmt(v.kW)} kW</span></div>
@@ -535,7 +551,6 @@ function renderVenueTab(){
         <div class="vc-row"><span>Rasio offline</span><span class="vc-val">${v.r.off}×</span></div>
         <div class="vc-row"><span>Rasio rev/pax</span><span class="vc-val">${v.r.rev}×</span></div>
       </div>
-      <div class="vc-warn" style="font-size:11px;color:var(--warn);margin-top:6px;line-height:1.4">${v.warn}</div>
     </div>`;
   }
   document.getElementById('venue-cards').innerHTML=html;
@@ -544,9 +559,6 @@ function renderVenueTab(){
 function selectVenue(id){
   if(G.phase===2) return;
   D().venue=id;
-  // Reset cabor to keep only compatible ones
-  const v=C.venues[id];
-  D().cabor=D().cabor.filter(cId=>C.cabor.find(x=>x.id===cId)?.compat.includes(id));
   renderVenueTab();
   renderCaborTab();
   updatePreview();
@@ -580,7 +592,7 @@ function renderCaborTab(){
   <div style="overflow-x:auto">
   <table class="cabor-table"><thead><tr>
     <th></th><th>Cabang Olahraga</th><th>Kelompok</th>
-    <th>Biaya (jt)</th><th>kW</th><th>Poff Base</th><th>Tiket (rb)</th><th>Online Base</th><th>Compat?</th>
+    <th>Biaya Base (jt)</th><th>kW</th><th>P.Off Base</th><th>Tiket (rb)</th><th>Online Base</th>
   </tr></thead><tbody>`;
 
   C.cabor.forEach(c=>{
@@ -588,16 +600,15 @@ function renderCaborTab(){
     const compat=c.compat.includes(d.venue);
     const esOK=!c.es||(V()?.bc||d.bc);
     const available=compat&&esOK;
-    html+=`<tr class="cabor-row${sel?' selected':''}${!available?' unavailable':''}" onclick="toggleCabor('${c.id}')">
-      <td><div class="check-box${sel?' checked':''}${!available?' disabled':''}"></div></td>
-      <td>${c.e} ${c.name}${c.es?'<span class="na-badge">BC req</span>':''}</td>
+    html+=`<tr class="cabor-row${sel?' selected':''}${!available&&sel?' cabor-warn':''}" onclick="toggleCabor('${c.id}')">
+      <td><div class="check-box${sel?' checked':''}"></div></td>
+      <td>${c.e} ${c.name}${!available?'<span class="na-badge" style="background:var(--warn);color:#000">⚠️</span>':''}${c.es?'<span class="na-badge">BC req</span>':''}</td>
       <td style="color:var(--muted);font-size:11px">${c.g}</td>
-      <td>${fmt(Math.round(c.biaya*v.r.cabor))}</td>
+      <td>${fmt(c.biaya)}</td>
       <td>${c.kW===0?'<span class="text-accent">0 ✨</span>':fmt(c.kW)}</td>
       <td>${fmt(c.pBase)}</td>
       <td>${c.tiket}</td>
       <td>${fmt(c.oBase)}</td>
-      <td>${available?'<span class="text-accent">✅</span>':'<span class="text-danger">❌</span>'}</td>
     </tr>`;
   });
   html+='</tbody></table></div>';
@@ -607,10 +618,6 @@ function renderCaborTab(){
 function toggleCabor(id){
   const d=D(); const v=V();
   if(!v){showToast('Pilih venue dulu!');return;}
-  const c=C.cabor.find(x=>x.id===id);
-  const compat=c.compat.includes(d.venue);
-  const esOK=!c.es||(v.bc||d.bc);
-  if(!compat||!esOK){showToast('Cabor ini tidak kompatibel dengan venue yang dipilih.');return;}
   const idx=d.cabor.indexOf(id);
   if(idx>=0) d.cabor.splice(idx,1);
   else d.cabor.push(id);
@@ -686,14 +693,14 @@ function renderAddonsTab(){
         <input type="checkbox" ${d.opening?'checked':''} onchange="setExtra('opening',this.checked)">
         <div>
           <div class="extra-name">Panggung Opening — Rp 60jt <span style="color:var(--muted)">(+150 kW)</span></div>
-          <div class="extra-hint">poff ×${G.eventCard?.id==='A01'?'<span class="text-warn">1.30</span>':'1.10'} — efek berantai: toilet & security harus diupdate!</div>
+          <div class="extra-hint">P.Off ×${G.eventCard?.id==='A01'?'<span class="text-warn">1.30</span>':'1.10'} — efek berantai: toilet & security harus diupdate!</div>
         </div>
       </label>
       <label class="extra-check-item">
         <input type="checkbox" ${d.closing?'checked':''} onchange="setExtra('closing',this.checked)">
         <div>
           <div class="extra-name">Panggung Closing — Rp 50jt <span style="color:var(--muted)">(+100 kW)</span></div>
-          <div class="extra-hint">poff ×1.08 — efek kumulatif jika bersama Opening.</div>
+          <div class="extra-hint">P.Off ×1.08 — efek kumulatif jika bersama Opening.</div>
         </div>
       </label>
     </div>
@@ -701,13 +708,13 @@ function renderAddonsTab(){
     <div class="section-card">
       <div class="section-title">🍔 Food & Beverage</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Catchment system: revenue dibatasi oleh jumlah penonton aktual.</div>
-      ${buildSlider('foodStall',d.foodStall,0,15,'Food Stall — Rp 8jt/unit, rev maks Rp 15jt/unit (800 pax/unit)','unit')}
-      ${buildSlider('foodTruck',d.foodTruck,0,10,'Food Truck — Rp 12jt/unit, rev maks Rp 22jt/unit (1.200 pax/unit)','unit')}
+      ${buildSlider('foodStall',d.foodStall,0,999,'Food Stall — Rp 8jt/unit, rev maks Rp 15jt/unit (800 pax/unit)','unit')}
+      ${buildSlider('foodTruck',d.foodTruck,0,999,'Food Truck — Rp 12jt/unit, rev maks Rp 22jt/unit (1.200 pax/unit)','unit')}
     </div>
 
     <div class="section-card">
       <div class="section-title">🎪 Booth & Media</div>
-      ${buildSlider('boothSponsor',d.boothSponsor,0,10,'Booth Sponsor — Rp 10jt/booth, rev Rp 30jt × saturasi (5.000 viewers/booth)','booth')}
+      ${buildSlider('boothSponsor',d.boothSponsor,0,999,'Booth Sponsor — Rp 10jt/booth, rev Rp 30jt × saturasi (5.000 viewers/booth)','booth')}
       <label class="extra-check-item" style="margin-top:10px">
         <input type="checkbox" ${d.msa?'checked':''} onchange="setExtra('msa',this.checked)">
         <div>
@@ -731,20 +738,20 @@ function renderOpTab(){
       <div class="section-title">🚽 Toilet Portable</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
         Bawaan venue: <strong class="text-primary">${v?v.toilets:0}</strong> unit &nbsp;|&nbsp;
-        Dibutuhkan: <strong class="text-warn">${tReq}</strong> unit (≥ penonton÷100) &nbsp;|&nbsp;
-        Total kamu: <strong class="${r&&r.toiletsTotal>=tReq?'text-accent':'text-danger'}">${r?r.toiletsTotal:0}</strong>
+        P.Off saat ini: <strong class="text-warn">${fmt(Math.round(poff))}</strong> &nbsp;|&nbsp;
+        Total toilet kamu: <strong class="text-accent">${r?r.toiletsTotal:(v?v.toilets:0)}</strong>
       </div>
-      ${buildSlider('toilet10',d.toilet10,0,30,'Pak 10 unit — Rp 22jt/pak','pak')}
-      ${buildSlider('toilet5',d.toilet5,0,30,'Pak 5 unit — Rp 12jt/pak','pak')}
+      ${buildSlider('toilet10',d.toilet10,0,999,'Pak 10 unit — Rp 22jt/pak','pak')}
+      ${buildSlider('toilet5',d.toilet5,0,999,'Pak 5 unit — Rp 12jt/pak','pak')}
     </div>
 
     <div class="section-card">
       <div class="section-title">🛡️ Petugas Keamanan</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
-        Dibutuhkan: <strong class="text-warn">${sReq}</strong> org (≥ max(10, penonton÷200)) &nbsp;|&nbsp;
-        Kamu beli: <strong class="${r&&r.securityTotal>=sReq?'text-accent':'text-danger'}">${d.security*10}</strong> org
+        P.Off saat ini: <strong class="text-warn">${fmt(Math.round(poff))}</strong> &nbsp;|&nbsp;
+        Total security kamu: <strong class="text-accent">${d.security*10}</strong> org
       </div>
-      ${buildSlider('security',d.security,0,30,'Pak 10 org — Rp 15jt/pak','pak')}
+      ${buildSlider('security',d.security,0,999,'Pak 10 org — Rp 15jt/pak','pak')}
     </div>
 
     <div class="section-card">
@@ -768,7 +775,7 @@ function buildSlider(key,val,min,max,label,unit){
       <input type="number" id="ni-${key}" min="${min}" max="${max}" value="${val}"
         oninput="setExtra('${key}',+clamp(+this.value,${min},${max}));this.value=D().${key}">
       <button class="num-btn" onclick="setExtra('${key}',Math.min(${max},+(document.getElementById('ni-${key}').value||0)+1));document.getElementById('ni-${key}').value=D().${key}">+</button>
-      <span class="num-unit">${unit} <span style="color:var(--muted);font-weight:400">/ maks ${max}</span></span>
+      <span class="num-unit">${unit}${max<100?` <span style="color:var(--muted);font-weight:400">/ maks ${max}</span>`:''}</span>
     </div>
   </div>`;
 }
@@ -802,19 +809,19 @@ function updatePreview(){
   setTxt('prev-sponsor',`${C.sponsorTiers[r.sponsorIdx].tier} = Rp ${r.revSponsor} jt`);
   setTxt('prev-kw',    `${fmt(r.kWTotal)} / ${fmt(r.kWAvail)} kW`);
 
-  // Constraints
+  // Constraints — show values only, no LULUS/GAGAL indicators
   const cons=[
-    {id:'c-listrik',ok:r.constraints.listrik,txt:`Listrik: ${r.blackout?'❌ BLACKOUT':'✅ OK'} (${fmt(r.kWTotal)}/${fmt(r.kWAvail)} kW)`},
-    {id:'c-toilet', ok:r.constraints.toilet, txt:`Toilet: ${r.toiletsTotal}/${r.toiletsReq} unit ${r.constraints.toilet?'✅':'❌'}`},
-    {id:'c-sec',    ok:r.constraints.security,txt:`Security: ${r.securityTotal}/${r.securityReq} org ${r.constraints.security?'✅':'❌'}`},
-    {id:'c-cabor',  ok:r.constraints.cabor,  txt:`Cabor: ${d.cabor.length} pilih, ${r.nIncompat} incompat ${r.constraints.cabor?'✅':'❌'}`},
-    {id:'c-medis',  ok:r.constraints.medis,  txt:`Medis: ${r.constraints.medis?'✅ Dibeli':'❌ Belum dibeli!'}`},
-    {id:'c-budget', ok:r.constraints.budget, txt:`Budget: Rp ${fmt(Math.round(r.totalCost))} / 3.000 jt ${r.constraints.budget?'✅':'❌'}`},
+    {id:'c-listrik',txt:`Listrik: ${fmt(r.kWTotal)} / ${fmt(r.kWAvail)} kW`},
+    {id:'c-toilet', txt:`Toilet: ${r.toiletsTotal} / ${r.toiletsReq} unit`},
+    {id:'c-sec',    txt:`Security: ${r.securityTotal} / ${r.securityReq} org`},
+    {id:'c-cabor',  txt:`Cabor: ${d.cabor.length} dipilih, ${r.nIncompat} incompat`},
+    {id:'c-medis',  txt:`Medis: ${d.medis?'Dibeli':'Belum dibeli'}`},
+    {id:'c-budget', txt:`Budget: Rp ${fmt(Math.round(r.totalCost))} / 3.000 jt`},
   ];
   cons.forEach(c=>{
     const dot=document.getElementById(c.id+'-dot');
     const txt=document.getElementById(c.id+'-txt');
-    if(dot){dot.className='constraint-dot '+(c.ok?'ok':'fail');}
+    if(dot){dot.className='constraint-dot neutral';}
     if(txt){txt.textContent=c.txt;}
   });
 }
@@ -987,15 +994,10 @@ function showResults(){
   // Assessment
   buildAssessment(r,d,ec);
 
-  // Next button
+  // Next button — always go to final report (Event Card disabled)
   const btn=document.getElementById('next-round-btn');
-  if(isP2){
-    btn.textContent='Lihat Laporan Akhir →';
-    btn.onclick=showFinalReport;
-  } else {
-    btn.textContent='Tarik Event Card →';
-    btn.onclick=showEventCard;
-  }
+  btn.textContent='Lihat Laporan Akhir →';
+  btn.onclick=showFinalReport;
 
   // Radar
   const labels=['ST','SP','RS','Dec'];
@@ -1005,13 +1007,6 @@ function showResults(){
   drawRadar(document.getElementById('radar-canvas'),vals,labels,maxV);
 
   showScreen('results');
-  // Phase 2 results: override step to "Laporan" (index 4) since Event Card phase is done
-  if(isP2){
-    document.querySelectorAll('.step').forEach((s,i)=>{
-      s.classList.toggle('active',i===4);
-      s.classList.toggle('done',i<4);
-    });
-  }
 }
 
 function buildBars(id,items,total,color){

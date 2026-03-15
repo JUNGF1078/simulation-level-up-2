@@ -16,11 +16,9 @@
     <div class="step-line"></div>
     <div class="step" data-step="1"><div class="dot">2</div><span>Planning</span></div>
     <div class="step-line"></div>
-    <div class="step" data-step="2"><div class="dot">3</div><span>Hasil P1</span></div>
+    <div class="step" data-step="2"><div class="dot">3</div><span>Hasil</span></div>
     <div class="step-line"></div>
-    <div class="step" data-step="3"><div class="dot">4</div><span>Event Card</span></div>
-    <div class="step-line"></div>
-    <div class="step" data-step="4"><div class="dot">5</div><span>Laporan</span></div>
+    <div class="step" data-step="3"><div class="dot">4</div><span>Laporan</span></div>
   </div>
   <div class="budget-pill">Budget: <span id="hdr-budget">3.000</span>M</div>
 </div>
@@ -30,13 +28,13 @@
   <div style="max-width:820px;margin:0 auto;padding:50px 24px">
     <div class="hero-tag">Level Up Simulation · Phase 3 · Sports Event Ecosystem</div>
     <h1 class="hero-title">Anda adalah <em>Kepala Panitia</em>.<br>Rancang event olahraga multi-cabang terbaik.</h1>
-    <p class="hero-sub">Budget Rp 3 Miliar. Pilih venue, min. 5 cabang olahraga kompatibel, dan kelola semua constraint operasional. Fase 2: Event Card ditarik secara acak — adaptasi keputusan Anda!</p>
+    <p class="hero-sub">Budget Rp 3 Miliar. Pilih venue, cabang olahraga, dan kelola semua kebutuhan operasional untuk menyelenggarakan event yang menguntungkan, aman, dan efisien.</p>
     <div class="info-grid" id="briefing-info"></div>
     <div class="objectives" id="briefing-objectives">
       <h3>Objektif</h3>
     </div>
     <div style="text-align:center">
-      <button class="btn btn-primary btn-lg" onclick="startPlanning()">Mulai Planning Phase 1 →</button>
+      <button class="btn btn-primary btn-lg" onclick="startPlanning()">Mulai Planning →</button>
     </div>
   </div>
 </div>
@@ -129,12 +127,12 @@
 
       <div>
         <div class="preview-title mb-8">6 Constraint</div>
-        <div class="constraint-row"><div class="constraint-dot warn" id="c-listrik-dot"></div><span id="c-listrik-txt">Listrik: —</span></div>
-        <div class="constraint-row"><div class="constraint-dot warn" id="c-toilet-dot"></div><span id="c-toilet-txt">Toilet: —</span></div>
-        <div class="constraint-row"><div class="constraint-dot warn" id="c-sec-dot"></div><span id="c-sec-txt">Security: —</span></div>
-        <div class="constraint-row"><div class="constraint-dot warn" id="c-cabor-dot"></div><span id="c-cabor-txt">Cabor: —</span></div>
-        <div class="constraint-row"><div class="constraint-dot warn" id="c-medis-dot"></div><span id="c-medis-txt">Medis: —</span></div>
-        <div class="constraint-row"><div class="constraint-dot warn" id="c-budget-dot"></div><span id="c-budget-txt">Budget: —</span></div>
+        <div class="constraint-row"><div class="constraint-dot neutral" id="c-listrik-dot"></div><span id="c-listrik-txt">Listrik: —</span></div>
+        <div class="constraint-row"><div class="constraint-dot neutral" id="c-toilet-dot"></div><span id="c-toilet-txt">Toilet: —</span></div>
+        <div class="constraint-row"><div class="constraint-dot neutral" id="c-sec-dot"></div><span id="c-sec-txt">Security: —</span></div>
+        <div class="constraint-row"><div class="constraint-dot neutral" id="c-cabor-dot"></div><span id="c-cabor-txt">Cabor: —</span></div>
+        <div class="constraint-row"><div class="constraint-dot neutral" id="c-medis-dot"></div><span id="c-medis-txt">Medis: —</span></div>
+        <div class="constraint-row"><div class="constraint-dot neutral" id="c-budget-dot"></div><span id="c-budget-txt">Budget: —</span></div>
       </div>
 
       <button class="btn btn-accent btn-block" onclick="runSimulation()" style="margin-top:auto">
@@ -195,7 +193,8 @@
       </div>
     </div>
 
-    <div class="assessment-box">
+    <!-- Analisis Strategi — assessor only, hidden from participant -->
+    <div class="assessment-box" id="assessment-section" style="display:none">
       <h3>Analisis Strategi</h3>
       <div id="strengths-list"></div>
       <div class="divider"></div>
@@ -204,8 +203,8 @@
   </div>
 </div>
 
-<!-- ══ SCREEN: EVENT CARD GACHA ══ -->
-<div id="event-card" class="screen">
+<!-- ══ SCREEN: EVENT CARD GACHA (DISABLED) ══ -->
+<div id="event-card" class="screen" style="display:none">
   <div style="max-width:700px;margin:0 auto;padding:50px 24px;text-align:center">
     <div class="hero-tag">Fase 2 — Event Card</div>
     <h1 style="font-size:28px;font-weight:800;margin-bottom:8px">Tarik Event Card</h1>

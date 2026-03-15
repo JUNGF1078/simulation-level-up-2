@@ -112,6 +112,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .constraint-dot.ok{background:var(--accent)}
 .constraint-dot.fail{background:var(--danger)}
 .constraint-dot.warn{background:var(--warn)}
+.constraint-dot.neutral{background:var(--muted)}
 .profit-big{text-align:center;padding:14px;background:#0a1628;border-radius:10px;border:1px solid var(--border)}
 .profit-big .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
 .profit-big .amount{font-size:28px;font-weight:800;margin-top:4px}
