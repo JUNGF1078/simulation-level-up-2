@@ -83,7 +83,7 @@
       <!-- TAB: CABOR -->
       <div class="tab-pane" id="tab-cabor">
         <div class="section-card">
-          <div class="section-title">⚽ Cabang Olahraga <span style="font-size:11px;font-weight:400;color:var(--muted)">(min 5, semua harus kompatibel)</span></div>
+          <div class="section-title">⚽ Cabang Olahraga <span style="font-size:11px;font-weight:400;color:var(--muted)">(min 5 kompatibel)</span></div>
           <div id="cabor-list"></div>
         </div>
       </div>
@@ -106,47 +106,34 @@
       <div style="height:80px"></div>
     </div>
 
-    <!-- RIGHT: LIVE PREVIEW -->
+    <!-- RIGHT: TIMER + SUBMIT PANEL -->
     <div class="preview-panel">
-      <div class="preview-title">Live Preview</div>
-
-      <div class="profit-big">
-        <div class="label">Estimasi Profit</div>
-        <div class="amount" id="preview-profit">—</div>
-      </div>
+      <div class="preview-title">⏱ Waktu</div>
+      <div class="timer-big" id="countdown-timer">30:00</div>
+      <div id="timer-warning" style="display:none;color:var(--danger);font-size:12px;text-align:center;margin-bottom:12px;font-weight:600">⚠️ Waktu ideal sudah habis!</div>
 
       <div>
-        <div class="preview-title mb-8">Finansial</div>
-        <div class="metric-row"><span>Total Biaya</span><span class="metric-val" id="prev-cost">—</span></div>
-        <div class="metric-row"><span>Total Revenue</span><span class="metric-val" id="prev-rev">—</span></div>
-        <div class="metric-row"><span>Sisa Budget</span><span class="metric-val" id="prev-sisa">—</span></div>
-        <div class="metric-row"><span>Sponsorship</span><span class="metric-val" id="prev-sponsor">—</span></div>
+        <div class="preview-title mb-8">Ringkasan Pilihan</div>
+        <div class="metric-row"><span>Venue</span><span class="metric-val" id="prev-venue">—</span></div>
+        <div class="metric-row"><span>Cabor dipilih</span><span class="metric-val" id="prev-cabor-count">0</span></div>
+        <div class="metric-row"><span>Medis</span><span class="metric-val" id="prev-medis">Belum</span></div>
       </div>
 
-      <div>
-        <div class="preview-title mb-8">Audiens</div>
-        <div class="metric-row"><span>Penonton Offline</span><span class="metric-val" id="prev-poff">—</span></div>
-        <div class="metric-row"><span>Penonton Online</span><span class="metric-val" id="prev-pon">—</span></div>
-        <div class="metric-row"><span>Total Viewers</span><span class="metric-val" id="prev-viewers">—</span></div>
-      </div>
-
-      <div>
-        <div class="preview-title mb-8">Listrik</div>
-        <div class="metric-row"><span>Pakai / Tersedia</span><span class="metric-val" id="prev-kw">—</span></div>
-      </div>
-
-      <div>
-        <div class="preview-title mb-8">6 Constraint</div>
-        <div class="constraint-row"><div class="constraint-dot neutral" id="c-listrik-dot"></div><span id="c-listrik-txt">Listrik: —</span></div>
-        <div class="constraint-row"><div class="constraint-dot neutral" id="c-toilet-dot"></div><span id="c-toilet-txt">Toilet: —</span></div>
-        <div class="constraint-row"><div class="constraint-dot neutral" id="c-sec-dot"></div><span id="c-sec-txt">Security: —</span></div>
-        <div class="constraint-row"><div class="constraint-dot neutral" id="c-cabor-dot"></div><span id="c-cabor-txt">Cabor: —</span></div>
-        <div class="constraint-row"><div class="constraint-dot neutral" id="c-medis-dot"></div><span id="c-medis-txt">Medis: —</span></div>
-        <div class="constraint-row"><div class="constraint-dot neutral" id="c-budget-dot"></div><span id="c-budget-txt">Budget: —</span></div>
+      <!-- Hidden elements to keep JS refs working -->
+      <div style="display:none">
+        <span id="preview-profit"></span><span id="prev-cost"></span><span id="prev-rev"></span>
+        <span id="prev-sisa"></span><span id="prev-poff"></span><span id="prev-pon"></span>
+        <span id="prev-viewers"></span><span id="prev-sponsor"></span><span id="prev-kw"></span>
+        <span id="c-listrik-dot"></span><span id="c-listrik-txt"></span>
+        <span id="c-toilet-dot"></span><span id="c-toilet-txt"></span>
+        <span id="c-sec-dot"></span><span id="c-sec-txt"></span>
+        <span id="c-cabor-dot"></span><span id="c-cabor-txt"></span>
+        <span id="c-medis-dot"></span><span id="c-medis-txt"></span>
+        <span id="c-budget-dot"></span><span id="c-budget-txt"></span>
       </div>
 
       <button class="btn btn-accent btn-block" onclick="runSimulation()" style="margin-top:auto">
-        ▶ Jalankan Simulasi
+        ▶ Submit Rencana
       </button>
     </div>
   </div>

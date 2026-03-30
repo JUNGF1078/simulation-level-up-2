@@ -52,6 +52,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .planning-layout{display:grid;grid-template-columns:1fr 320px;gap:0;height:calc(100vh - 57px);overflow:hidden}
 .decisions-panel{overflow-y:auto;padding:24px;position:relative}
 .preview-panel{background:var(--card);border-left:1px solid var(--border);overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.timer-big{font-size:48px;font-weight:700;text-align:center;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:2px;padding:12px 0}
 
 /* TABS */
 .tabs{display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap}
