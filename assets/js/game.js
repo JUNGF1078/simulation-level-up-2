@@ -129,6 +129,7 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   updateSteps(id);
+  showFloatTools(id==='planning');
 }
 
 function updateSteps(screenId){
@@ -470,7 +471,7 @@ function buildBriefing(){
     <div class="obj-item"><div class="obj-icon">⚡</div><strong>Listrik</strong> — Kebutuhan listrik tidak boleh melebihi kapasitas.</div>
     <div class="obj-item"><div class="obj-icon">🚽</div><strong>Toilet</strong> — Toilet harus mencukupi untuk penonton.</div>
     <div class="obj-item"><div class="obj-icon">🛡️</div><strong>Keamanan</strong> — Petugas keamanan harus mencukupi.</div>
-    <div class="obj-item"><div class="obj-icon">⚽</div><strong>Cabor</strong> — Minimal 5 cabor, semua harus sesuai fasilitas venue.</div>
+    <div class="obj-item"><div class="obj-icon">⚽</div><strong>Cabor</strong> — Minimal 5 cabor yang kompatibel dengan venue.</div>
     <div class="obj-item"><div class="obj-icon">🏥</div><strong>Medis</strong> — Tim Medis & P3K wajib dibeli.</div>
     <div class="obj-item"><div class="obj-icon">💰</div><strong>Budget</strong> — Total pengeluaran tidak boleh melebihi Rp 3 miliar.</div>
 
@@ -1193,6 +1194,7 @@ function showFinalReport(){
     ec?`Skor Fase 1: ${s1.total}/100  |  Skor Fase 2 (${ec.name}): ${s2?s2.total:'—'}/100`
       :'Skor Fase 1 (tanpa Event Card)';
 
+  renderCalcLog();
   showScreen('final');
 }
 
@@ -1453,6 +1455,317 @@ function exportCSV(){
   a.href=url; a.download='level-up-score.csv'; a.click();
   URL.revokeObjectURL(url);
   showToast('CSV berhasil didownload!');
+}
+
+// ══════════════════════════════════════════════════════
+// CALCULATOR
+// ══════════════════════════════════════════════════════
+let calcState={cur:'0',prev:null,op:null,fresh:true};
+
+function toggleCalc(){
+  const p=document.getElementById('calc-panel');
+  const fab=document.getElementById('fab-calc');
+  if(p.style.display==='none'){
+    p.style.display='block'; fab.classList.add('active');
+    document.getElementById('notes-panel').style.display='none';
+    document.getElementById('fab-notes').classList.remove('active');
+  } else {
+    p.style.display='none'; fab.classList.remove('active');
+  }
+}
+
+function toggleNotes(){
+  const p=document.getElementById('notes-panel');
+  const fab=document.getElementById('fab-notes');
+  if(p.style.display==='none'){
+    p.style.display='block'; fab.classList.add('active');
+    document.getElementById('calc-panel').style.display='none';
+    document.getElementById('fab-calc').classList.remove('active');
+  } else {
+    p.style.display='none'; fab.classList.remove('active');
+  }
+}
+
+function calcKey(k){
+  const disp=document.getElementById('calc-display');
+  const hist=document.getElementById('calc-history');
+  const s=calcState;
+
+  if(k==='C'){
+    s.cur='0';s.prev=null;s.op=null;s.fresh=true;
+    hist.textContent='';
+    disp.textContent='0'; return;
+  }
+  if(k==='±'){
+    if(s.cur!=='0') s.cur=s.cur.startsWith('-')?s.cur.slice(1):'-'+s.cur;
+    disp.textContent=s.cur; return;
+  }
+  if(k==='%'){
+    s.cur=String(parseFloat(s.cur)/100);
+    disp.textContent=s.cur; return;
+  }
+  if('0123456789'.includes(k)){
+    if(s.fresh){s.cur=k;s.fresh=false;}
+    else s.cur+=k;
+    disp.textContent=s.cur; return;
+  }
+  if(k==='.'){
+    if(s.fresh){s.cur='0.';s.fresh=false;}
+    else if(!s.cur.includes('.')) s.cur+='.';
+    disp.textContent=s.cur; return;
+  }
+  if('+-×÷'.includes(k)){
+    if(s.op&&!s.fresh) calcExec();
+    s.prev=parseFloat(s.cur); s.op=k; s.fresh=true;
+    hist.textContent=`${s.prev} ${k}`;
+    return;
+  }
+  if(k==='='){
+    if(s.op) calcExec();
+    hist.textContent=''; s.op=null; s.prev=null;
+  }
+}
+
+function calcExec(){
+  const s=calcState;
+  const a=s.prev, b=parseFloat(s.cur);
+  let r=0;
+  switch(s.op){
+    case '+':r=a+b;break;case '-':r=a-b;break;
+    case '×':r=a*b;break;case '÷':r=b!==0?a/b:0;break;
+  }
+  // Round to avoid floating point issues
+  r=Math.round(r*1e10)/1e10;
+  s.cur=String(r); s.fresh=true; s.prev=r;
+  document.getElementById('calc-display').textContent=s.cur;
+  document.getElementById('calc-history').textContent='';
+}
+
+// Show/hide floating tools when entering/leaving planning
+function showFloatTools(show){
+  document.getElementById('float-tools').style.display=show?'flex':'none';
+  if(!show){
+    document.getElementById('calc-panel').style.display='none';
+    document.getElementById('notes-panel').style.display='none';
+    document.getElementById('fab-calc').classList.remove('active');
+    document.getElementById('fab-notes').classList.remove('active');
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// CALCULATION LOG (QA)
+// ══════════════════════════════════════════════════════
+function buildCalcLog(){
+  const lines=[];
+  const ln=(...args)=>lines.push(args.join(''));
+  const sep=t=>{ln('');ln('════════════════════════════════════════');ln(t);ln('════════════════════════════════════════');};
+  const f=(n,d=0)=>Number(n).toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+  const p1d=G.p1d, p1r=G.p1r, p1s=G.p1s;
+  const p2d=G.p2d, p2r=G.p2r, p2s=G.p2s;
+  const ec=G.eventCard;
+  const hasP2=!!(ec&&p2r&&p2s);
+
+  if(!p1r||!p1s){return 'Belum ada data simulasi.';}
+
+  const v=C.venues[p1d.venue];
+
+  // ── FASE 1 LOG ──
+  sep('FASE 1 — LOG PERHITUNGAN');
+  ln('Venue: ',v.name,' (',v.sub,')');
+  ln('  Sewa       = Rp ',f(v.cost),' jt');
+  ln('  Listrik    = ',f(v.kW),' kW');
+  ln('  Toilet     = ',v.toilets,' unit');
+  ln('  BC built-in= ',v.bc?'Ya':'Tidak');
+  ln('  Max Offline= ',f(v.maxOff),' pax');
+  ln('  Rasio: cabor=',v.r.cabor,'× | off=',v.r.off,'× | rev=',v.r.rev,'×');
+
+  buildCalcLogPhase(lines, p1d, p1r, p1s, null, v, 'Fase 1');
+
+  if(hasP2){
+    sep('FASE 2 — LOG PERHITUNGAN (Event Card: '+ec.e+' '+ec.name+')');
+    ln('Event Card: ',ec.desc);
+    buildCalcLogPhase(lines, p2d, p2r, p2s, ec, v, 'Fase 2');
+
+    // LA detail
+    sep('LEARNING AGILITY DETAIL');
+    const la=p2s.la_detail;
+    ln('Diagnosis: ',la.diag,'/8');
+    switch(ec.id){
+      case 'C01':
+        ln('  C01: Hujan Lebat → cek toilet & security tidak naik');
+        ln('  P1 toilet packs=',p1d.toilet5+p1d.toilet10,' → P2=',p2d.toilet5+p2d.toilet10,(p2d.toilet5+p2d.toilet10<=p1d.toilet5+p1d.toilet10)?' ✓ Benar':' ✗ Salah naik');
+        ln('  P1 security=',p1d.security,' → P2=',p2d.security,(p2d.security<=p1d.security)?' ✓ Benar':' ✗ Salah naik');
+        break;
+      case 'S01':
+        ln('  S01: Sponsor Mundur → naikkan viewers ATAU kurangi cost');
+        ln('  Viewers: P1=',Math.round(p1r.totalViewers),' → P2=',Math.round(p2r.totalViewers),(p2r.totalViewers>p1r.totalViewers)?' ✓':' ✗');
+        ln('  Cost: P1=',Math.round(p1r.totalCost),' → P2=',Math.round(p2r.totalCost),(p2r.totalCost<p1r.totalCost)?' ✓':' ✗');
+        break;
+      case 'L01':
+        ln('  L01: Krisis Generator → verifikasi deficit dulu');
+        ln('  P1 deficit=',p1r.kWDeficit,' kW',(p1r.kWDeficit>0)?'(ADA deficit)':'(TIDAK ada deficit)');
+        ln('  P2 genset dibeli=',(p2d.gensetKecil+p2d.gensetBesar),' unit');
+        break;
+      case 'A01':
+        ln('  A01: Artis Viral → update toilet & security');
+        ln('  P2 toilet: ',p2r.toiletsTotal,'/',p2r.toiletsReq,(p2r.toiletsTotal>=p2r.toiletsReq)?' ✓':' ✗');
+        ln('  P2 security: ',p2r.securityTotal,'/',p2r.securityReq,(p2r.securityTotal>=p2r.securityReq)?' ✓':' ✗');
+        break;
+      case 'K01':
+        ln('  K01: Kuota Bertambah → update toilet & security');
+        ln('  P2 toilet: ',p2r.toiletsTotal,'/',p2r.toiletsReq,(p2r.toiletsTotal>=p2r.toiletsReq)?' ✓':' ✗');
+        ln('  P2 security: ',p2r.securityTotal,'/',p2r.securityReq,(p2r.securityTotal>=p2r.securityReq)?' ✓':' ✗');
+        break;
+    }
+    ln('Efisiensi: ',la.eff,'/12');
+    const dRev=p2r.totalRev-p1r.totalRev;
+    const dCost=Math.max(0,p2r.totalCost-p1r.totalCost);
+    const net=dRev-dCost;
+    const pct=p1r.totalRev>0?net/p1r.totalRev*100:0;
+    ln('  ΔRevenue  = ',f(Math.round(dRev)),' jt');
+    ln('  ΔCost     = ',f(Math.round(dCost)),' jt');
+    ln('  Net       = ',f(Math.round(net)),' jt (',pct.toFixed(1),'%)');
+    ln('Integrity: ',la.integ,'/5');
+    ln('  ΔnPass = ',p2r.nPass-p1r.nPass,' (P1:',p1r.nPass,' → P2:',p2r.nPass,')');
+    ln('TOTAL LA RAW = ',la.total,'/25 → ×0.8 = ',Math.round(la.total*0.8));
+  }
+
+  // ── SCORING SUMMARY ──
+  sep('SCORING SUMMARY');
+  ln('FASE 1:');
+  ln('  ST (n_pass constraint)  = ',p1s.st,'/25');
+  ln('  SP (margin)             = ',p1s.sp,'/25');
+  ln('  RS (resource stewardship)= ',p1s.rs,'/25');
+  ln('  Dec (decisiveness)      = ',p1s.dec,'/25');
+  ln('  TOTAL                   = ',p1s.total,'/100');
+  if(hasP2){
+    ln('');
+    ln('FASE 2 (semua ×0.8 + LA):');
+    ln('  ST  = ',p2s.raw.st,' ×0.8 = ',p2s.st,'/20');
+    ln('  SP  = ',p2s.raw.sp,' ×0.8 = ',p2s.sp,'/20');
+    ln('  RS  = ',p2s.raw.rs,' ×0.8 = ',p2s.rs,'/20');
+    ln('  Dec = ',p2s.raw.dec,' ×0.8 = ',p2s.dec,'/20');
+    ln('  LA  = ',p2s.la_detail.total,' ×0.8 = ',p2s.la,'/20');
+    ln('  TOTAL = ',p2s.total,'/100');
+  }
+
+  return lines.join('\n');
+}
+
+function buildCalcLogPhase(lines, d, r, s, ec, v, label){
+  const ln=(...args)=>lines.push(args.join(''));
+  const f=(n,d=0)=>Number(n).toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+  ln('');
+  ln('── CABOR ──');
+  ln('Cabor terpilih: ',d.cabor.length,' (kompatibel: ',r.nCompat,', inkompatibel: ',r.nIncompat,')');
+  r.caborDetails.forEach(cd=>{
+    const c=C.cabor.find(x=>x.id===cd.id);
+    if(cd.compat){
+      ln('  ',cd.e||'·',' ',cd.name,': biaya=',f(Math.round(c.biaya*v.r.cabor)),'jt, kW=',c.kW,
+        ', pOff=',f(Math.round(cd.poff)),', pOn=',f(Math.round(cd.pon)),
+        ', revTiket=',f(Math.round(cd.rev/1000)),'jt');
+    } else {
+      ln('  ⚠ ',cd.name,': INKOMPATIBEL — biaya tetap dikenakan, revenue = 0');
+    }
+  });
+
+  ln('');
+  ln('── LISTRIK ──');
+  ln('kW Cabor   = ',f(r.kWCabor));
+  ln('kW Extras  = ',f(r.kWExtras),' (BC:',d.bc?200:0,' + Stream:',d.streaming?80:0,' + Open:',d.opening?150:0,' + Close:',d.closing?100:0,')');
+  ln('kW Total   = ',f(r.kWTotal));
+  ln('kW Venue   = ',f(r.kWVenue));
+  ln('kW Genset  = ',f(r.kWGenset),' (Kecil:',d.gensetKecil,'×300 + Besar:',d.gensetBesar,'×700)');
+  ln('kW Tersedia= ',f(r.kWAvail));
+  ln('Deficit    = ',f(r.kWDeficit),' kW → ',r.blackout?'❌ BLACKOUT':'✅ Aman');
+
+  ln('');
+  ln('── PENONTON ──');
+  const bcActive = v.bc || d.bc;
+  const openMult = d.opening ? (ec?.id==='A01' ? 1.30 : 1.10) : 1;
+  const closeMult = d.closing ? 1.08 : 1;
+  const rainFactor = (ec?.id==='C01' && (d.venue==='v1'||d.venue==='v3')) ? 0.60 : 1;
+  const k01poff = ec?.id==='K01' ? 1.10 : 1;
+  const k01pon  = ec?.id==='K01' ? 1.20 : 1;
+  const shuttleMult = Math.pow(1.05, d.shuttleBus);
+  ln('Modifiers: opening=',openMult,'× | closing=',closeMult,'× | rain=',rainFactor,'× | k01poff=',k01poff,'× | shuttle=',shuttleMult.toFixed(3),'×');
+  ln('P.Off Sum (pre-cap) = ',f(Math.round(r.poffSum / (r.capRatio<1 ? r.capRatio : 1))));
+  if(r.capRatio<1) ln('Venue cap applied: ',f(v.maxOff),' pax → capRatio=',r.capRatio.toFixed(4));
+  ln('P.Off Sum (final)   = ',f(Math.round(r.poffSum)));
+  ln('P.On Sum            = ',f(Math.round(r.ponSum)),(bcActive?'':'(no BC → 0)'));
+  ln('Total Viewers       = ',f(Math.round(r.totalViewers)));
+
+  ln('');
+  ln('── REVENUE ──');
+  ln('Rev Tiket   = ΣrevTiket / 1000 × revPerPax(',v.r.rev,') × capRatio(',r.capRatio.toFixed(4),') = Rp ',f(Math.round(r.revTiket)),' jt');
+  const tier=C.sponsorTiers[r.sponsorIdx];
+  ln('Sponsor     = Tier "',tier.tier,'" (',tier.label,') → Rp ',f(r.revSponsor),' jt');
+  if(ec?.id==='S01') ln('  (S01 aktif: tier turun 1 level)');
+  ln('F&B         = min(stall=',d.foodStall,', poff/',800,'=',f(Math.round(r.poffSum/800),1),') × 15 = Rp ',f(Math.round(r.revFoodStall)),' jt');
+  ln('Booth       = ',d.boothSponsor,' booth × 30 × saturasi(',r.sat.toFixed(2),') = Rp ',f(Math.round(r.revBooth)),' jt');
+  ln('TOTAL REV   = Rp ',f(Math.round(r.totalRev)),' jt');
+
+  ln('');
+  ln('── COST ──');
+  ln('Venue       = Rp ',f(r.costVenue),' jt');
+  ln('Cabor       = Rp ',f(Math.round(r.costCabor)),' jt');
+  ln('Extras      = Rp ',f(Math.round(r.costExtras)),' jt');
+  ln('  BC:',d.bc?80:0,' Stream:',d.streaming?45:0,' Open:',d.opening?60:0,' Close:',d.closing?50:0);
+  ln('  GenK:',d.gensetKecil,'×',r.gKCost,'=',d.gensetKecil*r.gKCost,' GenB:',d.gensetBesar,'×',r.gBCost,'=',d.gensetBesar*r.gBCost);
+  ln('  Toilet10:',d.toilet10,'×22=',d.toilet10*22,' Toilet5:',d.toilet5,'×12=',d.toilet5*12);
+  ln('  Security:',d.security,'×15=',d.security*15,' SecVIP:',d.securityVip,'×12=',d.securityVip*12);
+  ln('  Medis:',d.medis?25:0,' Ambulans:',d.ambulans?20:0);
+  ln('  FoodStall:',d.foodStall,'×8=',d.foodStall*8,' Booth:',d.boothSponsor,'×10=',d.boothSponsor*10);
+  ln('  Shuttle:',d.shuttleBus,'×18=',d.shuttleBus*18,' MSA:',d.msa?35:0);
+  ln('TOTAL COST  = Rp ',f(Math.round(r.totalCost)),' jt');
+  ln('PROFIT      = Rp ',f(Math.round(r.profit)),' jt (margin: ',r.margin.toFixed(1),'%)');
+
+  ln('');
+  ln('── 6 CONSTRAINT ──');
+  ln('Listrik  : ',r.constraints.listrik?'LULUS':'GAGAL',' (pakai:',f(r.kWTotal),' / tersedia:',f(r.kWAvail),')');
+  ln('Toilet   : ',r.constraints.toilet?'LULUS':'GAGAL',' (',r.toiletsTotal,' / ',r.toiletsReq,' unit)');
+  ln('Security : ',r.constraints.security?'LULUS':'GAGAL',' (',r.securityTotal,' / ',r.securityReq,' org)');
+  ln('Cabor    : ',r.constraints.cabor?'LULUS':'GAGAL',' (',r.nCompat,' kompatibel)');
+  ln('Medis    : ',r.constraints.medis?'LULUS':'GAGAL');
+  ln('Budget   : ',r.constraints.budget?'LULUS':'GAGAL',' (cost:',f(Math.round(r.totalCost)),' / 3.000)');
+  ln('n_pass   = ',r.nPass,'/6');
+
+  ln('');
+  ln('── RESOURCE STEWARDSHIP ──');
+  const tRatio=r.toiletsReq>0?(r.toiletsTotal/r.toiletsReq):0;
+  const sRatio=r.securityTotal/Math.max(r.securityReq,1);
+  ln('Toilet    : rasio=',tRatio.toFixed(2),'× → RS=',r.rs_toilet,'/5');
+  ln('Security  : rasio=',sRatio.toFixed(2),'× → RS=',r.rs_security,'/5');
+  ln('Listrik   : deficit=',f(r.kWDeficit),'kW, genset=',f(r.kWGenset),'kW → RS=',r.rs_listrik,'/5');
+  ln('Budget    : sisa=',f(Math.round(3000-r.totalCost)),'jt (',((3000-r.totalCost)/3000*100).toFixed(0),'%) → RS=',r.rs_budget,'/5');
+  ln('F&B       : catchment=',r.catchRatio.toFixed(2),'× → RS=',r.rs_fb,'/5');
+  ln('TOTAL RS  = ',r.totalRS,'/25');
+
+  ln('');
+  ln('── SCORING ',label,' ──');
+  const stLookup=[0,4,8,12,17,21,25];
+  ln('ST: n_pass=',r.nPass,' → lookup[',r.nPass,']=',stLookup[clamp(r.nPass,0,6)]);
+  ln('SP: margin=',r.margin.toFixed(1),'% → ',s.sp||(s.raw?s.raw.sp:0));
+  ln('RS: totalRS=',r.totalRS,' → ',r.totalRS);
+  const timeMin = label==='Fase 1'?G.p1time:G.p2time;
+  ln('Dec: waktu=',timeMin.toFixed(1),' mnt → ts=',s.ts||0,' → dec=round(ts×n_pass/6)=',s.dec||(s.raw?s.raw.dec:0));
+}
+
+function renderCalcLog(){
+  const el=document.getElementById('calc-log');
+  if(el) el.textContent=buildCalcLog();
+}
+
+function exportCalcLog(){
+  const log=buildCalcLog();
+  const blob=new Blob(['\uFEFF'+log],{type:'text/plain;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='level-up-calc-log.txt'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Log perhitungan berhasil didownload!');
 }
 
 // ══════════════════════════════════════════════════════

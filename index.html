@@ -259,10 +259,69 @@
       </div>
     </div>
 
+    <!-- Calculation Log for QA -->
+    <div class="assessment-box" id="calc-log-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0">📋 Log Perhitungan (QA Review)</h3>
+        <button class="btn btn-accent" onclick="exportCalcLog()" style="padding:6px 14px;font-size:12px">⬇ Export Log</button>
+      </div>
+      <div id="calc-log" style="font-family:monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;max-height:500px;overflow-y:auto;background:#0a1628;border-radius:8px;padding:16px;border:1px solid var(--border)"></div>
+    </div>
+
     <div style="text-align:center;margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
       <button class="btn btn-accent btn-lg" onclick="exportCSV()">⬇ Export CSV</button>
       <button class="btn btn-primary btn-lg" onclick="restartGame()">Main Lagi</button>
     </div>
+  </div>
+</div>
+
+<!-- ══ FLOATING TOOLS (Calculator + Notes) ══ -->
+<div id="float-tools" class="float-tools" style="display:none">
+  <button class="float-fab" id="fab-calc" onclick="toggleCalc()" title="Kalkulator">🧮</button>
+  <button class="float-fab" id="fab-notes" onclick="toggleNotes()" title="Catatan">📝</button>
+</div>
+
+<!-- Calculator Panel -->
+<div id="calc-panel" class="tool-panel" style="display:none">
+  <div class="tool-panel-header">
+    <span>🧮 Kalkulator</span>
+    <button class="lk-close" onclick="toggleCalc()">&times;</button>
+  </div>
+  <div class="calc-body">
+    <div class="calc-display" id="calc-display">0</div>
+    <div class="calc-history" id="calc-history"></div>
+    <div class="calc-grid">
+      <button class="calc-key ck-fn" onclick="calcKey('C')">C</button>
+      <button class="calc-key ck-fn" onclick="calcKey('±')">±</button>
+      <button class="calc-key ck-fn" onclick="calcKey('%')">%</button>
+      <button class="calc-key ck-op" onclick="calcKey('÷')">÷</button>
+      <button class="calc-key" onclick="calcKey('7')">7</button>
+      <button class="calc-key" onclick="calcKey('8')">8</button>
+      <button class="calc-key" onclick="calcKey('9')">9</button>
+      <button class="calc-key ck-op" onclick="calcKey('×')">×</button>
+      <button class="calc-key" onclick="calcKey('4')">4</button>
+      <button class="calc-key" onclick="calcKey('5')">5</button>
+      <button class="calc-key" onclick="calcKey('6')">6</button>
+      <button class="calc-key ck-op" onclick="calcKey('-')">−</button>
+      <button class="calc-key" onclick="calcKey('1')">1</button>
+      <button class="calc-key" onclick="calcKey('2')">2</button>
+      <button class="calc-key" onclick="calcKey('3')">3</button>
+      <button class="calc-key ck-op" onclick="calcKey('+')">+</button>
+      <button class="calc-key ck-zero" onclick="calcKey('0')">0</button>
+      <button class="calc-key" onclick="calcKey('.')">.</button>
+      <button class="calc-key ck-eq" onclick="calcKey('=')">=</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notes Panel -->
+<div id="notes-panel" class="tool-panel tool-panel-notes" style="display:none">
+  <div class="tool-panel-header">
+    <span>📝 Catatan</span>
+    <button class="lk-close" onclick="toggleNotes()">&times;</button>
+  </div>
+  <div class="notes-body">
+    <textarea id="notes-textarea" class="notes-textarea" placeholder="Ketik catatan di sini... &#10;&#10;Contoh:&#10;• Venue V5 punya 15 cabor&#10;• Budget sisa = 3000 - 560 = 2440&#10;• Toilet dibutuhkan = poff / 100"></textarea>
   </div>
 </div>
 
