@@ -4,9 +4,10 @@
   "description": "McKinsey GBA – Sports Event Ecosystem Planning Game",
   "scripts": {
     "dev": "vite",
-    "preview": "vite preview"
+    "build": "echo 'Static site — no build needed'",
+    "start": "serve . -s -l ${PORT:-3000}"
   },
-  "devDependencies": {
-    "vite": "^5.4.0"
+  "dependencies": {
+    "serve": "^14.2.4"
   }
 }
