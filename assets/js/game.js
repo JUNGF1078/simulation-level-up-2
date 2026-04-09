@@ -9,52 +9,57 @@ const C = {
     v1:{id:'v1',name:"Stadion Bumi Pertiwi",sub:"Outdoor",cost:650,kW:1200,toilets:80,bc:false,maxOff:30000,
         r:{cabor:0.88,off:1.20,rev:0.95},
         compat:['sepakBola','atletik','tenisDan','panahan','panjatTebing','maraton'],
+        fasilitas:"Lapangan rumput, lintasan atletik, court tenis outdoor, area panahan, dinding panjat tebing",
         desc:"Outdoor stadium. Cap 30.000 pax.",
         warn:"",
         trade:"✅ Offline ratio 1.20× | ✅ 6 cabor outdoor | ❌ Tidak ada BC | ❌ Listrik 1.200 kW"},
     v2:{id:'v2',name:"GOR Metropolitan",sub:"Indoor",cost:420,kW:3200,toilets:55,bc:true,maxOff:8000,
         r:{cabor:0.95,off:0.90,rev:1.10},
         compat:['buluTangkis','bolaVoli','basket','futsal','tenisMeja','pencakSilat','tinju','taekwondo','eSport'],
+        fasilitas:"Lapangan parket indoor, matras beladiri, ring tinju, meja tenis, area gaming digital",
         desc:"Indoor GOR. Cap 8.000 pax.",
         warn:"",
         trade:"✅ Broadcasting built-in | ✅ Rev/pax 1.10× | ✅ 9 cabor indoor | ❌ Cap 8.000 pax"},
     v3:{id:'v3',name:"Lapangan Terbuka",sub:"Outdoor",cost:150,kW:1000,toilets:10,bc:false,maxOff:30000,
         r:{cabor:1.20,off:1.60,rev:0.70},
         compat:['sepakBola','tenisDan','panahan','maraton','futsal'],
+        fasilitas:"Lapangan outdoor terbuka, court tenis, area panahan, rute maraton",
         desc:"Outdoor termurah. Cap 30.000 pax.",
         warn:"",
         trade:"✅ Sewa termurah Rp 150jt | ✅ Rasio offline 1.60× | ❌ Hanya 5 cabor | ❌ Listrik & toilet minim"},
     v4:{id:'v4',name:"Sport Hall Elite",sub:"Indoor Premium",cost:880,kW:3800,toilets:40,bc:true,maxOff:15000,
         r:{cabor:0.82,off:0.70,rev:1.45},
         compat:['buluTangkis','bolaVoli','basket','futsal','tenisMeja','pencakSilat','tinju','taekwondo','eSport'],
+        fasilitas:"Lapangan parket indoor premium, matras beladiri, ring tinju, meja tenis, area gaming digital",
         desc:"Indoor premium. Cap 15.000 pax.",
         warn:"",
         trade:"✅ Rev/pax tertinggi 1.45× | ✅ Biaya cabor 0.82× | ❌ Sewa tertinggi | ❌ Offline 0.70×"},
     v5:{id:'v5',name:"Kompleks Olahraga Nusantara",sub:"Mixed",cost:560,kW:4200,toilets:70,bc:true,maxOff:45000,
         r:{cabor:1.05,off:1.05,rev:1.00},
         compat:['sepakBola','renang','tenisDan','panahan','panjatTebing','maraton','buluTangkis','bolaVoli','basket','futsal','tenisMeja','pencakSilat','tinju','taekwondo','eSport'],
+        fasilitas:"Lapangan rumput, kolam renang, lintasan atletik, court tenis, area panahan, dinding panjat, lapangan parket indoor, matras beladiri, ring tinju, meja tenis, area gaming digital",
         desc:"Mixed paling fleksibel. Cap 45.000 pax.",
         warn:"",
         trade:"✅ 15 cabor | ✅ Broadcasting + kolam renang | ❌ Biaya cabor 1.05× | ❌ Atletik tidak bisa"},
   },
 
   cabor:[
-    {id:'sepakBola',   e:'⚽',name:"Sepak Bola",       g:"Outdoor Lapangan", biaya:180,kW:250, pBase:6000,tiket:75, oBase:40000, compat:['v1','v3','v5'],es:false},
-    {id:'atletik',     e:'🏃',name:"Atletik",           g:"Outdoor Lintasan", biaya:120,kW:200, pBase:4000,tiket:50, oBase:30000, compat:['v1'],          es:false},
-    {id:'renang',      e:'🏊',name:"Renang",             g:"Akuatik",          biaya:150,kW:450, pBase:2000,tiket:60, oBase:20000, compat:['v5'],          es:false},
-    {id:'tenisDan',    e:'🎾',name:"Tenis Lapangan",    g:"Outdoor Court",    biaya:70, kW:230, pBase:1200,tiket:65, oBase:10000, compat:['v1','v3','v5'],es:false},
-    {id:'panahan',     e:'🏹',name:"Panahan",            g:"Outdoor Target",   biaya:45, kW:150, pBase:700, tiket:40, oBase:8000,  compat:['v1','v3','v5'],es:false},
-    {id:'panjatTebing',e:'🧗',name:"Panjat Tebing",     g:"Outdoor Wall",     biaya:65, kW:180, pBase:1200,tiket:55, oBase:14000, compat:['v1','v5'],     es:false},
-    {id:'maraton',     e:'🏃',name:"Maraton",            g:"Outdoor Rute",     biaya:90, kW:0,   pBase:8000,tiket:30, oBase:35000, compat:['v1','v3','v5'],es:false},
-    {id:'buluTangkis', e:'🏸',name:"Bulu Tangkis",      g:"Indoor Court",     biaya:85, kW:360, pBase:2000,tiket:55, oBase:28000, compat:['v2','v4','v5'],es:false},
-    {id:'bolaVoli',    e:'🏐',name:"Bola Voli",          g:"Indoor Court",     biaya:80, kW:380, pBase:2500,tiket:50, oBase:18000, compat:['v2','v4','v5'],es:false},
-    {id:'basket',      e:'🏀',name:"Basket",             g:"Indoor Court",     biaya:100,kW:420, pBase:3000,tiket:55, oBase:22000, compat:['v2','v4','v5'],es:false},
-    {id:'futsal',      e:'⚽',name:"Futsal",             g:"Indoor/Outdoor",   biaya:75, kW:330, pBase:1800,tiket:45, oBase:15000, compat:['v2','v3','v4','v5'],es:false},
-    {id:'tenisMeja',   e:'🏓',name:"Tenis Meja",         g:"Indoor Table",     biaya:50, kW:800, pBase:2400,tiket:0,  oBase:12000, compat:['v2','v4','v5'],es:false},
-    {id:'pencakSilat', e:'🥋',name:"Pencak Silat",       g:"Beladiri Matras",  biaya:55, kW:210, pBase:1000,tiket:0,  oBase:12000, compat:['v2','v4','v5'],es:false},
-    {id:'tinju',       e:'🥊',name:"Tinju",              g:"Ring Tinju",       biaya:70, kW:240, pBase:2400,tiket:0,  oBase:0,     compat:['v2','v4','v5'],es:false},
-    {id:'taekwondo',   e:'🥋',name:"Taekwondo",          g:"Beladiri Matras",  biaya:60, kW:220, pBase:1200,tiket:45, oBase:0,     compat:['v2','v4','v5'],es:false},
-    {id:'eSport',      e:'🎮',name:"E-Sport Demo",       g:"Digital Gaming",   biaya:100,kW:800, pBase:500, tiket:0,  oBase:80000, compat:['v2','v4','v5'],es:true},
+    {id:'sepakBola',   e:'⚽',name:"Sepak Bola",       g:"Outdoor Lapangan", req:"Lapangan rumput",            biaya:180,kW:250, pBase:6000,tiket:75, oBase:40000, compat:['v1','v3','v5'],es:false},
+    {id:'atletik',     e:'🏃',name:"Atletik",           g:"Outdoor Lintasan", req:"Lintasan atletik",           biaya:120,kW:200, pBase:4000,tiket:50, oBase:30000, compat:['v1'],          es:false},
+    {id:'renang',      e:'🏊',name:"Renang",             g:"Akuatik",          req:"Kolam renang",               biaya:150,kW:450, pBase:2000,tiket:60, oBase:20000, compat:['v5'],          es:false},
+    {id:'tenisDan',    e:'🎾',name:"Tenis Lapangan",    g:"Outdoor Court",    req:"Court tenis outdoor",        biaya:70, kW:230, pBase:1200,tiket:65, oBase:10000, compat:['v1','v3','v5'],es:false},
+    {id:'panahan',     e:'🏹',name:"Panahan",            g:"Outdoor Target",   req:"Area panahan",               biaya:45, kW:150, pBase:700, tiket:40, oBase:8000,  compat:['v1','v3','v5'],es:false},
+    {id:'panjatTebing',e:'🧗',name:"Panjat Tebing",     g:"Outdoor Wall",     req:"Dinding panjat tebing",      biaya:65, kW:180, pBase:1200,tiket:55, oBase:14000, compat:['v1','v5'],     es:false},
+    {id:'maraton',     e:'🏃',name:"Maraton",            g:"Outdoor Rute",     req:"Rute outdoor",               biaya:90, kW:0,   pBase:8000,tiket:30, oBase:35000, compat:['v1','v3','v5'],es:false},
+    {id:'buluTangkis', e:'🏸',name:"Bulu Tangkis",      g:"Indoor Court",     req:"Lapangan parket indoor",     biaya:85, kW:360, pBase:2000,tiket:55, oBase:28000, compat:['v2','v4','v5'],es:false},
+    {id:'bolaVoli',    e:'🏐',name:"Bola Voli",          g:"Indoor Court",     req:"Lapangan parket indoor",     biaya:80, kW:380, pBase:2500,tiket:50, oBase:18000, compat:['v2','v4','v5'],es:false},
+    {id:'basket',      e:'🏀',name:"Basket",             g:"Indoor Court",     req:"Lapangan parket indoor",     biaya:100,kW:420, pBase:3000,tiket:55, oBase:22000, compat:['v2','v4','v5'],es:false},
+    {id:'futsal',      e:'⚽',name:"Futsal",             g:"Indoor/Outdoor",   req:"Lapangan indoor atau outdoor",biaya:75, kW:330, pBase:1800,tiket:45, oBase:15000, compat:['v2','v3','v4','v5'],es:false},
+    {id:'tenisMeja',   e:'🏓',name:"Tenis Meja",         g:"Indoor Table",     req:"Meja tenis",                 biaya:50, kW:800, pBase:2400,tiket:0,  oBase:12000, compat:['v2','v4','v5'],es:false},
+    {id:'pencakSilat', e:'🥋',name:"Pencak Silat",       g:"Beladiri Matras",  req:"Matras beladiri",            biaya:55, kW:210, pBase:1000,tiket:0,  oBase:12000, compat:['v2','v4','v5'],es:false},
+    {id:'tinju',       e:'🥊',name:"Tinju",              g:"Ring Tinju",       req:"Ring tinju",                 biaya:70, kW:240, pBase:2400,tiket:0,  oBase:0,     compat:['v2','v4','v5'],es:false},
+    {id:'taekwondo',   e:'🥋',name:"Taekwondo",          g:"Beladiri Matras",  req:"Matras beladiri",            biaya:60, kW:220, pBase:1200,tiket:45, oBase:0,     compat:['v2','v4','v5'],es:false},
+    {id:'eSport',      e:'🎮',name:"E-Sport Demo",       g:"Digital Gaming",   req:"Area gaming digital",        biaya:100,kW:800, pBase:500, tiket:0,  oBase:80000, compat:['v2','v4','v5'],es:true},
   ],
 
   sponsorTiers:[
@@ -120,7 +125,7 @@ let currentTab = 'venue';
 // HELPERS
 // ══════════════════════════════════════════════════════
 const fmt  = (n,d=0) => Number(n).toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d});
-const fmtM = n => (n>=0?'+':'')+fmt(Math.round(n))+'M';
+const fmtM = n => (n>=0?'+':'')+fmt(Math.round(n))+' jt';
 const D    = () => G.phase===1 ? G.p1d : G.p2d;
 const V    = () => D().venue ? C.venues[D().venue] : null;
 const clamp= (v,a,b) => Math.min(b,Math.max(a,v));
@@ -583,12 +588,11 @@ function renderVenueTab(){
         <div class="vc-row"><span>Sewa</span><span class="vc-val">Rp ${fmt(v.cost)} jt</span></div>
         <div class="vc-row"><span>Listrik</span><span class="vc-val">${fmt(v.kW)} kW</span></div>
         <div class="vc-row"><span>Toilet bawaan</span><span class="vc-val">${v.toilets} unit</span></div>
-        <div class="vc-row"><span>Broadcasting</span><span class="vc-val ${v.bc?'pos':'neg'}">${v.bc?'✅ Built-in':'❌ Tidak ada'}</span></div>
-        <div class="vc-row"><span>Max Offline</span><span class="vc-val">${v.maxOff?fmt(v.maxOff)+' pax':'Tidak ada cap'}</span></div>
-        <div class="vc-row"><span>Cabor compat</span><span class="vc-val text-accent">${v.compat.length} cabor</span></div>
+        <div class="vc-row"><span>Kapasitas penonton offline</span><span class="vc-val">${v.maxOff?fmt(v.maxOff)+' pax':'Tidak ada cap'}</span></div>
         <div class="vc-row"><span>Rasio biaya cabor</span><span class="vc-val">${v.r.cabor}×</span></div>
         <div class="vc-row"><span>Rasio offline</span><span class="vc-val">${v.r.off}×</span></div>
         <div class="vc-row"><span>Rasio rev/pax</span><span class="vc-val">${v.r.rev}×</span></div>
+        <div class="vc-row vc-row-full"><span>Fasilitas</span><span class="vc-val" style="font-size:11px;text-align:right">${v.fasilitas}</span></div>
       </div>
     </div>`;
   }
@@ -630,7 +634,7 @@ function renderCaborTab(){
   </div>
   <div style="overflow-x:auto">
   <table class="cabor-table"><thead><tr>
-    <th></th><th>Cabang Olahraga</th><th>Kelompok</th>
+    <th></th><th>Cabang Olahraga</th><th>Butuh Fasilitas</th>
     <th>Biaya Base (jt)</th><th>kW</th><th>P.Off Base</th><th>Tiket (rb)</th><th>Online Base</th>
   </tr></thead><tbody>`;
 
@@ -639,10 +643,10 @@ function renderCaborTab(){
     const compat=c.compat.includes(d.venue);
     const esOK=!c.es||(V()?.bc||d.bc);
     const available=compat&&esOK;
-    html+=`<tr class="cabor-row${sel?' selected':''}${!available&&sel?' cabor-warn':''}" onclick="toggleCabor('${c.id}')">
+    html+=`<tr class="cabor-row${sel?' selected':''}" onclick="toggleCabor('${c.id}')">
       <td><div class="check-box${sel?' checked':''}"></div></td>
-      <td>${c.e} ${c.name}${!available?'<span class="na-badge" style="background:var(--warn);color:#000">⚠️</span>':''}${c.es?'<span class="na-badge">BC req</span>':''}</td>
-      <td style="color:var(--muted);font-size:11px">${c.g}</td>
+      <td>${c.e} ${c.name}${c.es?'<span class="na-badge">BC req</span>':''}</td>
+      <td style="color:var(--muted);font-size:11px">${c.req}</td>
       <td>${fmt(c.biaya)}</td>
       <td>${c.kW===0?'<span class="text-accent">0 ✨</span>':fmt(c.kW)}</td>
       <td>${fmt(c.pBase)}</td>
@@ -679,30 +683,21 @@ function renderListrikTab(){
   document.getElementById('tab-listrik-content').innerHTML=`
     <div class="section-card">
       <div class="section-title">⚡ Status Listrik</div>
-      <div class="power-status-grid">
-        <div class="power-stat"><div class="ps-label">kW Venue</div><div class="ps-val text-primary">${fmt(kWVenue)}</div></div>
-        <div class="power-stat"><div class="ps-label">kW Cabor</div><div class="ps-val">${fmt(kWCabor)}</div></div>
-        <div class="power-stat"><div class="ps-label">kW Extras</div><div class="ps-val">${fmt(kWExtras)}</div></div>
-        <div class="power-stat"><div class="ps-label">kW Total Pakai</div><div class="ps-val ${kWTotal>kWVenue?'text-danger':'text-warn'}">${fmt(kWTotal)}</div></div>
-        <div class="power-stat"><div class="ps-label">kW Genset</div><div class="ps-val text-accent">${fmt(kWGenset)}</div></div>
-        <div class="power-stat"><div class="ps-label">kW Tersedia</div><div class="ps-val ${kWTotal>kWAvail?'text-danger':'text-accent'}">${fmt(kWAvail)}</div></div>
-      </div>
-      <div style="margin-top:10px;font-size:12px;padding:8px 12px;border-radius:6px;background:${deficit>0?(kWGenset>=deficit?'rgba(16,185,129,.1)':'rgba(239,68,68,.1)'):'rgba(16,185,129,.1)'}">
+      <div style="font-size:12px;padding:8px 12px;border-radius:6px;background:${deficit>0?(kWGenset>=deficit?'rgba(16,185,129,.1)':'rgba(239,68,68,.1)'):'rgba(16,185,129,.1)'}">
         ${deficit>0?`Deficit: ${fmt(deficit)} kW — ${kWGenset>=deficit?'✅ ditutup genset':'❌ BLACKOUT — beli genset!'}`:
-        `Surplus: ${fmt(kWVenue-kWTotal)} kW — ✅ Aman${kWGenset>0?' (hati-hati: genset mungkin tidak diperlukan)':''}`}
+        `✅ Listrik aman`}
       </div>
     </div>
 
     <div class="section-card">
       <div class="section-title">📡 Broadcasting & Streaming</div>
-      ${!v?.bc?`
-        <label class="extra-check-item">
-          <input type="checkbox" ${d.bc?'checked':''} onchange="setExtra('bc',this.checked)">
-          <div>
-            <div class="extra-name">Paket Broadcasting — Rp 80jt <span style="color:var(--muted)">(+200 kW)</span></div>
-            <div class="extra-hint">Aktifkan live streaming online. WAJIB untuk viewers online & E-Sport.</div>
-          </div>
-        </label>`:`<div style="font-size:12px;color:var(--accent);margin-bottom:12px">✅ Broadcasting built-in di venue ini</div>`}
+      <label class="extra-check-item" style="${v?.bc?'opacity:.6;pointer-events:none':''}">
+        <input type="checkbox" ${(v?.bc||d.bc)?'checked':''} onchange="setExtra('bc',this.checked)" ${v?.bc?'disabled':''}>
+        <div>
+          <div class="extra-name">Paket Broadcasting — Rp 80jt <span style="color:var(--muted)">(+200 kW)</span></div>
+          <div class="extra-hint">${v?.bc?'Sudah termasuk di venue ini.':'Aktifkan live streaming online. Wajib untuk viewers online &amp; E-Sport.'}</div>
+        </div>
+      </label>
       <label class="extra-check-item" style="${!(v?.bc||d.bc)?'opacity:.4;pointer-events:none':''}">
         <input type="checkbox" ${d.streaming?'checked':''} onchange="setExtra('streaming',this.checked)" ${!(v?.bc||d.bc)?'disabled':''}>
         <div>
@@ -713,10 +708,9 @@ function renderListrikTab(){
     </div>
 
     <div class="section-card">
-      <div class="section-title">🔋 Generator Tambahan <span style="font-weight:400;font-size:11px;color:var(--muted)">(maks 2 unit total)</span>
+      <div class="section-title">🔋 Generator Tambahan
         ${G.eventCard?.id==='L01'?'<span class="tag tag-red" style="margin-left:6px">⚡ HARGA ×1.60!</span>':''}
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Total unit: ${d.gensetKecil+d.gensetBesar}/2 ${d.gensetKecil+d.gensetBesar>2?'<span class="text-danger">⚠️ Melebihi batas!</span>':''}</div>
       ${buildSlider('gensetKecil',d.gensetKecil,0,2,`Genset Kecil (300 kW) — Rp ${gKCost}jt/unit`,'unit')}
       ${buildSlider('gensetBesar',d.gensetBesar,0,2,`Genset Besar (700 kW) — Rp ${gBCost}jt/unit`,'unit')}
     </div>
@@ -732,14 +726,14 @@ function renderAddonsTab(){
         <input type="checkbox" ${d.opening?'checked':''} onchange="setExtra('opening',this.checked)">
         <div>
           <div class="extra-name">Panggung Opening — Rp 60jt <span style="color:var(--muted)">(+150 kW)</span></div>
-          <div class="extra-hint">P.Off ×${G.eventCard?.id==='A01'?'<span class="text-warn">1.30</span>':'1.10'} — efek berantai: toilet & security harus diupdate!</div>
+          <div class="extra-hint">Mendatangkan lebih banyak penonton offline ×${G.eventCard?.id==='A01'?'<span class="text-warn">1.30</span>':'1.10'}.</div>
         </div>
       </label>
       <label class="extra-check-item">
         <input type="checkbox" ${d.closing?'checked':''} onchange="setExtra('closing',this.checked)">
         <div>
           <div class="extra-name">Panggung Closing — Rp 50jt <span style="color:var(--muted)">(+100 kW)</span></div>
-          <div class="extra-hint">P.Off ×1.08 — efek kumulatif jika bersama Opening.</div>
+          <div class="extra-hint">Mendatangkan lebih banyak penonton offline ×1.08.</div>
         </div>
       </label>
     </div>
@@ -798,8 +792,8 @@ function renderOpTab(){
       <label class="extra-check-item">
         <input type="checkbox" ${d.medis?'checked':''} onchange="setExtra('medis',this.checked)">
         <div>
-          <div class="extra-name">Tim Medis & P3K — Rp 25jt <span class="tag tag-red" style="margin-left:4px">WAJIB</span></div>
-          <div class="extra-hint">Event tidak sah tanpa tim medis. Constraint wajib!</div>
+          <div class="extra-name">Tim Medis & P3K — Rp 25jt</div>
+          <div class="extra-hint">Penanganan medis pertolongan pertama di lokasi event.</div>
         </div>
       </label>
       <label class="extra-check-item" style="margin-top:10px">
@@ -896,10 +890,10 @@ function animateSim(r,v,d,ec){
      detail:`Toilet: ${r.toiletsTotal}/${r.toiletsReq} unit | Security: ${r.securityTotal}/${r.securityReq} org`,
      val:r.constraints.toilet&&r.constraints.security?'✅ OK':'❌ Kurang'},
     {ico:'💰',name:'Revenue',
-     detail:`Tiket: ${fmt(Math.round(r.revTiket))}M | Sponsor: ${fmt(r.revSponsor)}M | F&B: ${fmt(Math.round(r.revFoodStall))}M`,
+     detail:`Tiket: ${fmt(Math.round(r.revTiket))} jt | Sponsor: ${fmt(r.revSponsor)} jt | F&B: ${fmt(Math.round(r.revFoodStall))} jt`,
      val:`Rp ${fmt(Math.round(r.totalRev))} jt`},
     {ico:'📊',name:'Profit Akhir',
-     detail:`Revenue ${fmt(Math.round(r.totalRev))}M − Cost ${fmt(Math.round(r.totalCost))}M`,
+     detail:`Revenue ${fmt(Math.round(r.totalRev))} jt − Cost ${fmt(Math.round(r.totalCost))} jt`,
      val:`${r.profit>=0?'+':''}${fmt(Math.round(r.profit))} jt`},
   ];
 
@@ -1036,7 +1030,7 @@ function buildBars(id,items,total,color){
     const pct=total>0?Math.min(100,it.val/total*100):0;
     return `<div class="bar-row">
       <div class="bar-label">${it.label}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}">${fmt(it.val)}M</div></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}">${fmt(it.val)} jt</div></div>
     </div>`;
   }).join('');
 }

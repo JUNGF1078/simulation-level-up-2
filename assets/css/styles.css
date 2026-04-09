@@ -258,6 +258,7 @@ canvas.radar{border-radius:10px}
 .vc-attrs{margin-bottom:10px}
 .vc-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid rgba(30,48,72,.6)}
 .vc-row:last-child{border-bottom:none}
+.vc-row-full{align-items:flex-start;gap:8px}.vc-row-full .vc-val{max-width:60%;color:var(--muted);font-weight:400;line-height:1.4}
 .vc-val{font-weight:700;color:var(--text)}
 .vc-val.pos{color:var(--accent)}
 .vc-val.neg{color:var(--danger)}
