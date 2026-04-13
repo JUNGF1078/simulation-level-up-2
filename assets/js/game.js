@@ -539,8 +539,9 @@ function buildPlanning(){
   const isAdapt = G.phase===2;
   const ec = G.eventCard;
 
-  // Update topbar budget pill
-  document.getElementById('hdr-budget').textContent='3.000';
+  // Update budget pill (if element exists)
+  const hdrBudget=document.getElementById('hdr-budget');
+  if(hdrBudget) hdrBudget.textContent='3.000';
 
   // Event card banner (Phase 2)
   const banner = document.getElementById('ec-banner');
@@ -1538,6 +1539,8 @@ function calcExec(){
 // Show/hide floating tools when entering/leaving planning
 function showFloatTools(show){
   document.getElementById('float-tools').style.display=show?'flex':'none';
+  const pvf=document.getElementById('preview-panel-float');
+  if(pvf) pvf.style.display=show?'flex':'none';
   if(!show){
     document.getElementById('calc-panel').style.display='none';
     document.getElementById('notes-panel').style.display='none';
@@ -1767,4 +1770,5 @@ function exportCalcLog(){
 // ══════════════════════════════════════════════════════
 window.addEventListener('load',()=>{
   buildBriefing();
+  updateSteps('briefing');
 });
