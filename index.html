@@ -4,13 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Level Up Simulation – Phase 3 Sports Event</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
 
+<!-- Laptop desk background -->
+<div id="bg-desk"></div>
+
+<!-- Laptop bezel frame overlay -->
+<div id="frame-overlay"></div>
+
+<!-- ══ APP WRAPPER — lives inside the frame's screen window ══ -->
+<div id="app-wrapper">
+
 <!-- TOP BAR -->
 <div id="topbar">
-  <div class="brand">LEVEL UP</div>
+  <div class="brand">
+    <img src="assets/img/folder.png" class="brand-folder" alt="">
+    <img src="assets/img/logo-next-chapter-colored.png" class="logo-img" alt="Logo">
+    <!-- logo is z-index:2, folder is z-index:1 — logo renders on top -->
+  </div>
   <div class="steps" id="steps">
     <div class="step active" data-step="0"><div class="dot">1</div><span>Briefing</span></div>
     <div class="step-line"></div>
@@ -22,6 +36,9 @@
   </div>
   <div class="budget-pill">Budget: <span id="hdr-budget">3.000</span> jt</div>
 </div>
+
+<!-- ══ SCREENS WRAPPER (scrollable area below topbar) ══ -->
+<div id="screens-wrap">
 
 <!-- ══ SCREEN: BRIEFING ══ -->
 <div id="briefing" class="screen active">
@@ -265,7 +282,7 @@
         <h3 style="margin:0">📋 Log Perhitungan (QA Review)</h3>
         <button class="btn btn-accent" onclick="exportCalcLog()" style="padding:6px 14px;font-size:12px">⬇ Export Log</button>
       </div>
-      <div id="calc-log" style="font-family:monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;max-height:500px;overflow-y:auto;background:#0a1628;border-radius:8px;padding:16px;border:1px solid var(--border)"></div>
+      <div id="calc-log"></div>
     </div>
 
     <div style="text-align:center;margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
@@ -274,6 +291,8 @@
     </div>
   </div>
 </div>
+
+</div><!-- end #screens-wrap -->
 
 <!-- ══ FLOATING TOOLS (Calculator + Notes) ══ -->
 <div id="float-tools" class="float-tools" style="display:none">
@@ -328,6 +347,9 @@
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
+</div><!-- end #app-wrapper -->
+
 <script src="assets/js/game.js"></script>
+
 </body>
 </html>

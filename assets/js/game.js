@@ -683,7 +683,7 @@ function renderListrikTab(){
   document.getElementById('tab-listrik-content').innerHTML=`
     <div class="section-card">
       <div class="section-title">⚡ Status Listrik</div>
-      <div style="font-size:12px;padding:8px 12px;border-radius:6px;background:${deficit>0?(kWGenset>=deficit?'rgba(16,185,129,.1)':'rgba(239,68,68,.1)'):'rgba(16,185,129,.1)'}">
+      <div style="font-size:12px;padding:8px 12px;border-radius:6px;background:${deficit>0?(kWGenset>=deficit?'rgba(0,199,160,.12)':'rgba(255,83,117,.12)'):'rgba(0,199,160,.12)'}">
         ${deficit>0?`Deficit: ${fmt(deficit)} kW — ${kWGenset>=deficit?'✅ ditutup genset':'❌ BLACKOUT — beli genset!'}`:
         `✅ Listrik aman`}
       </div>
@@ -1211,7 +1211,7 @@ function drawRadar(canvas,vals,labels,maxVal){
   ctx.clearRect(0,0,W,H);
 
   // Grid
-  ctx.strokeStyle='rgba(30,48,72,.6)';ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(214,204,232,.8)';ctx.lineWidth=1;
   [0.25,0.5,0.75,1].forEach(f=>{
     ctx.beginPath();
     for(let i=0;i<n;i++){
@@ -1226,7 +1226,7 @@ function drawRadar(canvas,vals,labels,maxVal){
   for(let i=0;i<n;i++){
     const a=Math.PI*2*i/n-Math.PI/2;
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
-    ctx.strokeStyle='rgba(30,48,72,.6)';ctx.stroke();
+    ctx.strokeStyle='rgba(214,204,232,.8)';ctx.stroke();
   }
 
   // Data
@@ -1237,7 +1237,7 @@ function drawRadar(canvas,vals,labels,maxVal){
     i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   });
   ctx.closePath();
-  ctx.fillStyle='rgba(14,165,233,.18)';ctx.fill();
+  ctx.fillStyle='rgba(118,173,254,.22)';ctx.fill();
   ctx.strokeStyle='var(--primary)';ctx.lineWidth=2;ctx.stroke();
 
   // Labels
