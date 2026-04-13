@@ -274,20 +274,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 }
 #topbar .budget-pill span{color:var(--yellow-accent)}
 
-/* PROGRESS STEPS */
-.steps{display:flex;gap:0;margin:0 16px;align-items:center;flex:1}
-.step{display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,.5);font-weight:600;font-family:var(--font)}
-.step .dot{
-  width:24px;height:24px;border-radius:50%;
-  border:2px solid rgba(255,255,255,.25);
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;font-weight:700;margin-right:6px;flex-shrink:0;
-  background:rgba(255,255,255,.1);color:rgba(255,255,255,.55);
-}
-.step.done .dot{background:var(--green);border-color:var(--green);color:#fff}
-.step.active .dot{background:#fff;border-color:#fff;color:var(--blue-dark)}
-.step.active{color:#fff}
-.step-line{width:24px;height:2px;background:rgba(255,255,255,.2);margin:0 4px}
+/* old topbar step rules removed — phase bar styles now at top of file */
 
 /* ══ BRIEFING ══ */
 /* ══ BRIEFING SCREEN ══ */
