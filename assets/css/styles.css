@@ -5,14 +5,14 @@
    ════════════════════════════════════════════════════ */
 :root{
   /* ── Phase bar ──────────────────────────────────── */
-  --pb-top:        5vh;       /* vertical from top of screen           */
+  --pb-top:        4vh;       /* vertical from top of screen           */
   --pb-height:     40px;
   --pb-shift-x:    -5vw;      /* horizontal nudge (negative = left)    */
-  --pb-step-gap:   92px;      /* spacing between each step pill        */
+  --pb-step-gap:   58px;      /* spacing between each step pill        */
 
   /* ── Budget oval ────────────────────────────────── */
   --budget-top:    8vh;       /* distance from top                     */
-  --budget-right:  19vw;      /* distance from right edge              */
+  --budget-right:  18.75vw;   /* distance from right edge              */
 
   /* ── Left notebook panel ────────────────────────── */
   --nb-top:        11vh;      /* below header                          */
