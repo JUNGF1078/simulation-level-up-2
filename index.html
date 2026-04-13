@@ -344,28 +344,6 @@
 
 <script src="assets/js/game.js"></script>
 
-<!-- ══ CANVAS SCALE — locks UI to 1440×900, background stretches freely ══ -->
-<script>
-(function(){
-  // Design canvas size — change these to match your intended layout
-  var W = 1440, H = 900;
-
-  function scaleApp(){
-    var scaleX = window.innerWidth  / W;
-    var scaleY = window.innerHeight / H;
-    var scale  = Math.min(scaleX, scaleY); // fit inside viewport (letterbox)
-    var el = document.getElementById('app-wrapper');
-    el.style.transform = 'scale(' + scale + ')';
-    // Center the scaled canvas
-    el.style.left = ((window.innerWidth  - W * scale) / 2) + 'px';
-    el.style.top  = ((window.innerHeight - H * scale) / 2) + 'px';
-  }
-
-  window.addEventListener('resize', scaleApp);
-  window.addEventListener('load',   scaleApp);
-})();
-</script>
-
 <!-- ══ LIVE LAYOUT CONFIG PANEL ══ -->
 <div id="live-cfg" style="
   position:fixed;bottom:20px;left:20px;z-index:9999;
