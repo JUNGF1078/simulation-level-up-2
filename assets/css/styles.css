@@ -37,9 +37,15 @@
 /* ══════════════════════════════════════════════════ */
 
 /* ══ FULL-SCREEN LAYOUT ══ */
-body{min-height:100vh;overflow:hidden;height:100vh;}
+body{width:100vw;height:100vh;overflow:hidden;margin:0;}
+
+/* Design canvas — fixed size, scaled by JS to fit viewport */
 #app-wrapper{
-  position:fixed;inset:0;
+  position:absolute;
+  top:0;left:0;
+  width:1440px;
+  height:900px;
+  transform-origin:top left;
   z-index:10;overflow:hidden;
   background:transparent;
 }
