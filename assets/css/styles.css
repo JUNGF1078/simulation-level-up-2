@@ -49,7 +49,8 @@ body{min-height:100vh;overflow:hidden;height:100vh;}
   bottom:var(--nb-bottom);
   left:var(--nb-left);
   right:var(--nb-right);
-  overflow:hidden;
+  overflow-y:auto;
+  overflow-x:hidden;
   background:var(--nb-bg);
   border-radius:var(--nb-radius);
   box-shadow:var(--nb-shadow);
@@ -237,7 +238,7 @@ body{min-height:100vh;overflow:hidden;height:100vh;}
 
 body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;font-size:14px;line-height:1.6}
 .screen{display:none;animation:fadeIn .3s ease}
-.screen.active{display:flex;flex-direction:column;height:100%;min-height:0}
+.screen.active{display:flex;flex-direction:column;min-height:0}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* ══ TOP BAR ══ */
@@ -278,7 +279,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
 /* ══ BRIEFING ══ */
 /* ══ BRIEFING SCREEN ══ */
-#briefing{overflow-y:auto;overflow-x:hidden}
+#briefing{overflow-y:visible;overflow-x:hidden}
 .briefing-wrap{padding:20px 24px 28px;max-width:860px;margin:0 auto}
 .briefing-subtitle{
   font-size:11px;color:rgba(30,58,110,0.5);font-weight:600;letter-spacing:1.5px;
@@ -335,9 +336,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
 /* ══ PLANNING ══ */
 #planning{display:none;flex-direction:column}
-#planning.active{display:flex;flex-direction:column;height:100%}
+#planning.active{display:flex;flex-direction:column;height:calc(100vh - var(--nb-top) - var(--nb-bottom));min-height:0}
 .planning-layout{display:flex;flex-direction:column;height:100%;overflow:hidden}
-#planning{height:100%}
 .decisions-panel{flex:1;overflow-y:auto;padding:16px 20px;position:relative;background:var(--neutral-1);padding-top:40px}
 .preview-panel{background:var(--card);border-left:3px solid var(--blue-light);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
 .timer-big{font-family:var(--font-serif);font-size:40px;font-weight:900;text-align:center;color:var(--green);font-variant-numeric:tabular-nums;letter-spacing:2px;padding:8px 0}
