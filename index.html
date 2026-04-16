@@ -367,9 +367,9 @@
 </div>
 
 <!-- Toggle button -->
-<!-- Config toggle — hidden by default; to re-enable change display:none → display:block -->
+<!-- Config toggle — visible -->
 <button id="cfg-toggle" onclick="toggleCfg()" style="
-  display:none;
+  display:block;
   position:fixed;bottom:20px;left:20px;z-index:10000;
   background:rgba(20,30,60,0.9);color:#fff;
   border:1.5px solid rgba(255,255,255,0.2);border-radius:10px;
@@ -387,7 +387,7 @@
     {key:'--pb-step-gap',  label:'Step spacing',        unit:'px',  min:0,   max:120, step:2},
     {group:'Budget Oval'},
     {key:'--budget-top',   label:'Budget top',          unit:'vh',  min:0,   max:15, step:0.5},
-    {key:'--budget-right', label:'Budget right',        unit:'vw',  min:0,   max:20, step:0.5},
+    {key:'--budget-right', label:'Budget right',        unit:'vw',  min:0,   max:25, step:0.5},
     {group:'Left Panel'},
     {key:'--nb-top',       label:'Panel top',           unit:'vh',  min:4,   max:25, step:0.5},
     {key:'--nb-bottom',    label:'Panel bottom',        unit:'vh',  min:0,   max:20, step:0.5},

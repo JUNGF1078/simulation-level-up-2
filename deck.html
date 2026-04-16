@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Level Up Simulation — Dev Journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#D92552;--blue:#427EC3;--green:#2FBA8E;--yellow:#F5C842;
+  --dark:#1A1A2E;--mid:#16213E;--card:rgba(255,255,255,0.07);
+  --text:#F0EDE8;--muted:rgba(240,237,232,0.55);
+  --font-h:'Merriweather',serif;--font-b:'Outfit',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--dark)}
+
+/* ── slide engine ── */
+.deck{width:100%;height:100%;position:relative}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:60px 80px;
+  opacity:0;pointer-events:none;
+  transition:opacity .45s ease,transform .45s ease;
+  transform:translateY(24px);
+}
+.slide.active{opacity:1;pointer-events:all;transform:translateY(0)}
+
+/* ── nav ── */
+#nav{
+  position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:16px;z-index:100;
+}
+.nav-btn{
+  background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);
+  color:var(--text);font-family:var(--font-b);font-size:14px;font-weight:600;
+  padding:10px 28px;border-radius:100px;cursor:pointer;
+  transition:background .2s,border-color .2s;
+}
+.nav-btn:hover{background:rgba(255,255,255,0.22);border-color:rgba(255,255,255,0.4)}
+#slide-counter{font-family:var(--font-b);font-size:13px;color:var(--muted);min-width:60px;text-align:center}
+.dot-row{display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.2);cursor:pointer;transition:all .2s}
+.dot.on{background:var(--blue);transform:scale(1.3)}
+
+/* ── bg blobs ── */
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.25;pointer-events:none}
+
+/* ── common typography ── */
+.tag{font-family:var(--font-b);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+h1{font-family:var(--font-h);font-size:clamp(38px,5vw,64px);font-weight:900;color:var(--text);line-height:1.1}
+h2{font-family:var(--font-h);font-size:clamp(24px,3vw,40px);font-weight:700;color:var(--text);line-height:1.2}
+h3{font-family:var(--font-b);font-size:18px;font-weight:700;color:var(--text)}
+p,li{font-family:var(--font-b);font-size:15px;color:var(--muted);line-height:1.7}
+strong{color:var(--text);font-weight:700}
+.accent{color:var(--red)}
+.hi-blue{color:var(--blue)}
+.hi-green{color:var(--green)}
+.hi-yellow{color:var(--yellow)}
+
+/* ── layout helpers ── */
+.cols{display:flex;gap:32px;width:100%;align-items:flex-start}
+.col{flex:1}
+.card{background:var(--card);border:1.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px 28px}
+.card.red{border-color:rgba(217,37,82,.4);background:rgba(217,37,82,.08)}
+.card.blue{border-color:rgba(66,126,195,.4);background:rgba(66,126,195,.08)}
+.card.green{border-color:rgba(47,186,142,.4);background:rgba(47,186,142,.08)}
+.card.yellow{border-color:rgba(245,200,66,.4);background:rgba(245,200,66,.08)}
+
+.pill{display:inline-block;padding:4px 14px;border-radius:100px;font-family:var(--font-b);font-size:12px;font-weight:700}
+.pill.red{background:rgba(217,37,82,.2);color:#f47399}
+.pill.blue{background:rgba(66,126,195,.2);color:#7eb8f7}
+.pill.green{background:rgba(47,186,142,.2);color:#5fe8be}
+.pill.yellow{background:rgba(245,200,66,.2);color:#f5d98a}
+
+table{width:100%;border-collapse:collapse;font-family:var(--font-b);font-size:14px}
+th{text-align:left;padding:10px 14px;color:var(--blue);font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;border-bottom:1.5px solid rgba(66,126,195,.3)}
+td{padding:10px 14px;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.07)}
+tr:last-child td{border-bottom:none}
+td strong{color:var(--text)}
+
+.code{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px 20px;font-family:'Courier New',monospace;font-size:13px;color:#a8d8a8;line-height:1.8;white-space:pre}
+
+.timeline-row{display:flex;gap:16px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.timeline-row:last-child{border-bottom:none}
+.tl-date{font-family:var(--font-b);font-size:12px;font-weight:700;color:var(--blue);min-width:60px;padding-top:2px}
+.tl-text{font-family:var(--font-b);font-size:14px;color:var(--muted);line-height:1.5}
+
+.step-row{display:flex;gap:12px;align-items:center;padding:8px 0}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-family:var(--font-b);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ── slide-specific ── */
+#s1{background:linear-gradient(135deg,#0f0c29,#1a1a3e,#24243e)}
+#s1 .blob.a{width:500px;height:500px;background:var(--red);top:-100px;right:-100px}
+#s1 .blob.b{width:400px;height:400px;background:var(--blue);bottom:-80px;left:-80px}
+#s1 .logo-wrap{display:flex;align-items:center;gap:16px;margin-bottom:32px}
+#s1 .logo-wrap img{width:80px}
+#s1 .divider{width:60px;height:4px;background:var(--red);border-radius:2px;margin:24px 0}
+#s1 .sub{font-family:var(--font-b);font-size:18px;color:var(--muted);margin-top:12px}
+
+#s2,#s3,#s4,#s5,#s6,#s7,#s8,#s9,#s10{
+  background:linear-gradient(160deg,#0d1b2a 0%,#1a1a2e 60%,#0d1b2a 100%);
+  justify-content:flex-start;padding-top:56px;
+}
+
+.slide-header{width:100%;margin-bottom:32px}
+.slide-header .tag{margin-bottom:8px}
+
+/* progress bar on top */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--red),var(--blue));transition:width .4s ease;z-index:200}
+</style>
+</head>
+<body>
+
+<div id="progress-bar" style="width:10%"></div>
+
+<div class="deck" id="deck">
+
+<!-- ══ SLIDE 1 — COVER ══ -->
+<div class="slide active" id="s1">
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="logo-wrap">
+    <img src="assets/img/logo-next-chapter-colored.png" onerror="this.style.display='none'">
+    <div>
+      <div class="tag">McKinsey Sports Event Ecosystem</div>
+      <div style="font-family:var(--font-b);font-size:13px;color:var(--muted)">Web Simulation Game</div>
+    </div>
+  </div>
+  <h1>Level Up<br><span class="accent">Simulation</span></h1>
+  <div class="divider"></div>
+  <p class="sub">From Setup to Product — Development Journey</p>
+  <div style="display:flex;gap:12px;margin-top:32px">
+    <span class="pill blue">Vanilla HTML/CSS/JS</span>
+    <span class="pill red">Next Chapter Design</span>
+    <span class="pill green">Railway Deploy</span>
+  </div>
+</div>
+
+<!-- ══ SLIDE 2 — PROJECT BRIEF ══ -->
+<div class="slide" id="s2">
+  <div class="slide-header">
+    <div class="tag">01 · Project Overview</div>
+    <h2>Apa yang dibangun?</h2>
+  </div>
+  <div class="cols">
+    <div class="col">
+      <div class="card blue" style="margin-bottom:16px">
+        <h3 style="margin-bottom:12px">🎯 Tujuan</h3>
+        <p>Simulasi manajemen event olahraga multi-cabang. Peserta berperan sebagai <strong>Kepala Panitia</strong> dengan budget <strong>Rp 3 Miliar</strong> untuk merancang event yang profitable, aman, dan efisien.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <h3 style="margin-bottom:10px">📱 5 Screen Flow</h3>
+        <div class="step-row"><div class="step-num">1</div><p><strong>Briefing</strong> — Baca instruksi & aturan</p></div>
+        <div class="step-row"><div class="step-num">2</div><p><strong>Planning</strong> — Pilih venue, cabor, add-ons</p></div>
+        <div class="step-row"><div class="step-num">3</div><p><strong>Simulation</strong> — Event cards & kejutan</p></div>
+        <div class="step-row"><div class="step-num">4</div><p><strong>Results</strong> — Scoring breakdown</p></div>
+        <div class="step-row"><div class="step-num">5</div><p><strong>Laporan</strong> — Final report & CSV export</p></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card green" style="margin-bottom:16px">
+        <h3 style="margin-bottom:12px">🛠 Tech Stack</h3>
+        <p><strong>Vanilla HTML + CSS + JS</strong><br>No framework, no bundler, single-file per layer</p>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <span class="pill green">index.html</span>
+          <span class="pill green">styles.css</span>
+          <span class="pill green">game.js</span>
+        </div>
+      </div>
+      <div class="card yellow">
+        <h3 style="margin-bottom:12px">⚙️ Constraint</h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+          <li><p>✓ Single-page app (no routing)</p></li>
+          <li><p>✓ Deploy ke Railway (static serve)</p></li>
+          <li><p>✓ Match Figma product design</p></li>
+          <li><p>✓ Bisa diakses dari GitHub</p></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 3 — DESIGN EVOLUTION ══ -->
+<div class="slide" id="s3">
+  <div class="slide-header">
+    <div class="tag">02 · Design System Evolution</div>
+    <h2>3 iterasi design system</h2>
+  </div>
+  <div class="cols" style="margin-bottom:28px">
+    <div class="col">
+      <div class="card" style="opacity:.6">
+        <div class="pill red" style="margin-bottom:12px">V1 — Ditinggalkan</div>
+        <h3 style="margin-bottom:8px">NES.css</h3>
+        <p>Retro 8-bit pixel art library. Cepat di-setup, tapi tone tidak sesuai McKinsey — terlalu playful.</p>
+        <p style="margin-top:8px;font-size:12px;color:rgba(240,237,232,.3)">Mar 3 → Mar 4, 2026</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="opacity:.75">
+        <div class="pill yellow" style="margin-bottom:12px">V2 — Interim</div>
+        <h3 style="margin-bottom:8px">IBM Carbon v10</h3>
+        <p>Enterprise design system. Komponen lengkap (bx--btn, bx--tile), dark theme g100, IBM Plex Sans. Terlalu berat & enterprise.</p>
+        <p style="margin-top:8px;font-size:12px;color:rgba(240,237,232,.3)">Mar 4 → Apr 13, 2026</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card green">
+        <div class="pill green" style="margin-bottom:12px">V3 — Final</div>
+        <h3 style="margin-bottom:8px">Next Chapter ✓</h3>
+        <p>Custom design system sesuai Figma. Warm cream background, ilustrasi sporty, typography ekspresif.</p>
+        <p style="margin-top:8px;font-size:12px;color:rgba(47,186,142,.6)">Apr 13, 2026 → sekarang</p>
+      </div>
+    </div>
+  </div>
+  <div class="card blue" style="width:100%">
+    <h3 style="margin-bottom:14px">Next Chapter — Design Tokens</h3>
+    <div class="cols" style="gap:24px">
+      <div><p><strong>Font</strong><br>Merriweather 900 (heading)<br>Outfit 400/600/700 (body)</p></div>
+      <div><p><strong>Colors</strong><br><span class="accent">■</span> Red #D92552 &nbsp;<span class="hi-blue">■</span> Blue #427EC3<br><span class="hi-green">■</span> Green #2FBA8E &nbsp;<span class="hi-yellow">■</span> Yellow #F5C842</p></div>
+      <div><p><strong>Background</strong><br>Ilustrasi sporty sebagai <code style="font-size:12px;color:#a8d8a8">&lt;img&gt;</code> HTML<br>UI layer transparan di atas</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 4 — ARSITEKTUR LAYOUT ══ -->
+<div class="slide" id="s4">
+  <div class="slide-header">
+    <div class="tag">03 · Architecture</div>
+    <h2>Struktur layout HTML</h2>
+  </div>
+  <div class="cols">
+    <div class="col" style="flex:1.1">
+      <div class="code">&lt;body&gt;
+  &lt;img id="bg-desk"&gt;       ← background bebas stretch
+  &lt;div id="app-wrapper"&gt;   ← fixed overlay z-index:10
+    &lt;img id="logo"&gt;         ← logo pojok kiri
+    &lt;div id="phase-bar"&gt;    ← progress steps
+    &lt;div id="budget-oval"&gt;  ← sisa budget
+    &lt;div id="screens-wrap"&gt; ← konten utama
+      ── #briefing
+      ── #planning
+         ├─ .decisions-panel (scroll)
+         └─ .preview-panel (timer)
+      ── #simulation
+      ── #results
+      ── #laporan</div>
+    </div>
+    <div class="col">
+      <div class="card" style="margin-bottom:16px">
+        <h3 style="margin-bottom:10px">🎛 CSS Variables Config</h3>
+        <p>Semua posisi dikontrol via <strong>:root</strong> variables. Bisa di-tune dari browser pakai <strong>Live Config Panel</strong> tanpa edit code.</p>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+          <p>📍 <strong>--pb-top</strong> — phase bar vertical</p>
+          <p>📍 <strong>--budget-right</strong> — budget oval</p>
+          <p>📍 <strong>--nb-left/right</strong> — panel lebar</p>
+          <p>📍 <strong>--pv-top/right</strong> — timer panel</p>
+        </div>
+      </div>
+      <div class="card red">
+        <h3 style="margin-bottom:8px">🔑 Key Principle</h3>
+        <p>Background <strong>stretch bebas</strong> (cover), UI content <strong>posisi fixed</strong> — tidak terdistorsi di resolusi berbeda</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 5 — FITUR UTAMA ══ -->
+<div class="slide" id="s5">
+  <div class="slide-header">
+    <div class="tag">04 · Features</div>
+    <h2>Fitur yang dibangun</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;width:100%">
+    <div class="card blue">
+      <div style="font-size:24px;margin-bottom:8px">🏟️</div>
+      <h3 style="margin-bottom:6px">Venue Picker</h3>
+      <p>5 venue dengan fasilitas, kapasitas, listrik. Kompatibilitas cabor otomatis dicek.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:24px;margin-bottom:8px">⚡</div>
+      <h3 style="margin-bottom:6px">Listrik Manager</h3>
+      <p>Calculator generator, constraint check, warning jika over kapasitas.</p>
+    </div>
+    <div class="card green">
+      <div style="font-size:24px;margin-bottom:8px">🎯</div>
+      <h3 style="margin-bottom:6px">Add-ons</h3>
+      <p>Broadcasting, panggung, medis, F&B, booth sponsor — semua opsional & berpengaruh ke score.</p>
+    </div>
+    <div class="card yellow">
+      <div style="font-size:24px;margin-bottom:8px">⏱️</div>
+      <h3 style="margin-bottom:6px">Timer Realtime</h3>
+      <p>Countdown 30 menit, auto-submit ketika habis, tampil di preview panel.</p>
+    </div>
+    <div class="card red">
+      <div style="font-size:24px;margin-bottom:8px">🧮</div>
+      <h3 style="margin-bottom:6px">Calculator + Log</h3>
+      <p>Floating calculator dengan riwayat perhitungan untuk bantu keputusan budget.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:24px;margin-bottom:8px">📊</div>
+      <h3 style="margin-bottom:6px">Scoring Engine</h3>
+      <p>RS formula, event card modifier, breakdown per kompetenci, CSV export.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 6 — TIMELINE ══ -->
+<div class="slide" id="s6">
+  <div class="slide-header">
+    <div class="tag">05 · Timeline</div>
+    <h2>Proses iterasi</h2>
+  </div>
+  <div class="cols">
+    <div class="col">
+      <div class="timeline-row"><div class="tl-date">Mar 3</div><div class="tl-text"><strong>Setup project</strong> — HTML skeleton, NES.css prototype, konten venue & cabor awal</div></div>
+      <div class="timeline-row"><div class="tl-date">Mar 4</div><div class="tl-text"><strong>Ganti Carbon Design System</strong> — IBM Plex Sans, dark theme, komponen lengkap</div></div>
+      <div class="timeline-row"><div class="tl-date">Mar 5</div><div class="tl-text"><strong>UX fixes</strong> — budget unit "M"→"jt", venue fasilitas, broadcasting options, hints text</div></div>
+      <div class="timeline-row"><div class="tl-date">Mar 6</div><div class="tl-text"><strong>Railway deploy</strong> — package.json, <code style="font-size:12px;color:#a8d8a8">serve .</code> config, fix start command</div></div>
+      <div class="timeline-row"><div class="tl-date">Mar 7</div><div class="tl-text"><strong>Fix logo broken</strong> — <code style="font-size:12px;color:#a8d8a8">assets/img/</code> folder belum di-commit ke git</div></div>
+    </div>
+    <div class="col">
+      <div class="timeline-row"><div class="tl-date">Apr 13</div><div class="tl-text"><strong>Revamp "Next Chapter"</strong> — full design system baru sesuai Figma, Merriweather + Outfit</div></div>
+      <div class="timeline-row"><div class="tl-date">Apr 13</div><div class="tl-text"><strong>Live Layout Config</strong> — floating panel dengan CSS var sliders, copy CSS button</div></div>
+      <div class="timeline-row"><div class="tl-date">Apr 14</div><div class="tl-text"><strong>Phase bar + budget oval</strong> — positioned di header, adjust via config panel</div></div>
+      <div class="timeline-row"><div class="tl-date">Apr 15</div><div class="tl-text"><strong>Scroll fix</strong> — semua screen bisa scroll, planning pakai internal flex scroll</div></div>
+      <div class="timeline-row"><div class="tl-date">Apr 15</div><div class="tl-text"><strong>Push images</strong> — Background, logo, planning illustrations ke GitHub</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 7 — TANTANGAN & SOLUSI ══ -->
+<div class="slide" id="s7">
+  <div class="slide-header">
+    <div class="tag">06 · Problem Solving</div>
+    <h2>Tantangan & solusi</h2>
+  </div>
+  <table style="width:100%">
+    <thead>
+      <tr><th>Tantangan</th><th>Root Cause</th><th>Solusi</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Background tidak stretch</strong></td><td>Background di CSS, bukan elemen</td><td>Ganti ke <code style="font-size:12px;color:#a8d8a8">&lt;img&gt;</code> HTML dengan object-fit:cover</td></tr>
+      <tr><td><strong>Phase bar beda di prod vs dev</strong></td><td>Resolusi layar berbeda, CSS fixed pixel</td><td>Live Config Panel → copy CSS yang sudah di-adjust</td></tr>
+      <tr><td><strong>Results screen tidak bisa scroll</strong></td><td><code style="font-size:12px;color:#a8d8a8">#screens-wrap: overflow:hidden</code></td><td>Ganti ke overflow-y:auto, planning pakai height khusus</td></tr>
+      <tr><td><strong>Logo pecah di Railway</strong></td><td><code style="font-size:12px;color:#a8d8a8">assets/img/</code> tidak ter-commit</td><td><code style="font-size:12px;color:#a8d8a8">git add assets/img/</code> explicit</td></tr>
+      <tr><td><strong>Railway: no start command</strong></td><td>Tidak ada package.json start script</td><td>Tambah <code style="font-size:12px;color:#a8d8a8">serve . -l $PORT</code> + serve di dependencies</td></tr>
+      <tr><td><strong>Vite tidak bundle game.js</strong></td><td>Script pakai non-module, Vite skip</td><td>Balik ke <code style="font-size:12px;color:#a8d8a8">serve .</code> direct, no bundler needed</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══ SLIDE 8 — LIVE CONFIG SYSTEM ══ -->
+<div class="slide" id="s8">
+  <div class="slide-header">
+    <div class="tag">07 · Dev Tooling</div>
+    <h2>Live Config Panel</h2>
+  </div>
+  <div class="cols">
+    <div class="col">
+      <p style="margin-bottom:20px"><strong>Problem:</strong> Posisi elemen (phase bar, budget oval, panel) berbeda di setiap layar & resolusi. Edit CSS → refresh → lihat hasilnya → edit lagi = lambat.</p>
+      <p style="margin-bottom:20px"><strong>Solution:</strong> Floating panel di browser dengan sliders yang langsung mengubah CSS variables secara realtime.</p>
+      <div class="card green">
+        <h3 style="margin-bottom:10px">🔄 Workflow</h3>
+        <div class="step-row"><div class="step-num">1</div><p>Buka <code style="font-size:12px;color:#a8d8a8">localhost:3001</code></p></div>
+        <div class="step-row"><div class="step-num">2</div><p>Drag sliders sampai posisi pas</p></div>
+        <div class="step-row"><div class="step-num">3</div><p>Klik <strong>"Copy CSS"</strong></p></div>
+        <div class="step-row"><div class="step-num">4</div><p>Paste ke <code style="font-size:12px;color:#a8d8a8">styles.css</code></p></div>
+        <div class="step-row"><div class="step-num">5</div><p><code style="font-size:12px;color:#a8d8a8">git push</code> ke Railway</p></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="margin-bottom:14px">
+        <h3 style="margin-bottom:12px">📐 Variables yang bisa di-tune</h3>
+        <table>
+          <tr><td><span class="pill blue" style="font-size:11px">Phase Bar</span></td><td><p>top, shift-X, step spacing</p></td></tr>
+          <tr><td><span class="pill red" style="font-size:11px">Budget Oval</span></td><td><p>top, right (0–25vw)</p></td></tr>
+          <tr><td><span class="pill green" style="font-size:11px">Left Panel</span></td><td><p>top, bottom, left, right</p></td></tr>
+          <tr><td><span class="pill yellow" style="font-size:11px">Timer Panel</span></td><td><p>top, right, width</p></td></tr>
+        </table>
+      </div>
+      <div class="card red">
+        <h3 style="margin-bottom:8px">💡 Insight</h3>
+        <p>Pisahkan <strong>design config</strong> dari logic. Posisi bukan urusan game.js — semua di CSS vars sehingga bisa diubah tanpa menyentuh logic game.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 9 — DEPLOYMENT PIPELINE ══ -->
+<div class="slide" id="s9">
+  <div class="slide-header">
+    <div class="tag">08 · Deployment</div>
+    <h2>Pipeline dari dev ke prod</h2>
+  </div>
+  <div class="cols">
+    <div class="col" style="flex:1.2">
+      <div class="code">Dev  localhost:3001
+  ↓
+  Adjust via Live Config Panel
+  ↓
+  Copy CSS → paste ke styles.css
+  ↓
+  git add assets/css/styles.css
+  git commit -m "chore: adjust layout"
+  ↓
+  git push origin2 main
+  ↓
+Railway (auto-deploy dari GitHub)
+  ↓
+  npm start
+  → serve . -l $PORT
+  ↓
+Production URL ✓</div>
+    </div>
+    <div class="col">
+      <div class="card blue" style="margin-bottom:16px">
+        <h3 style="margin-bottom:10px">📦 package.json</h3>
+        <div class="code" style="font-size:12px">{
+  "scripts": {
+    "start": "serve . -s -l ${PORT:-3000}"
+  },
+  "dependencies": {
+    "serve": "^14.2.1"
+  }
+}</div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:10px">🔧 2 Remotes</h3>
+        <p><strong>origin</strong> — JUN1078/simulation-levelup<br><em style="font-size:12px;color:rgba(240,237,232,.4)">(repository not found)</em></p>
+        <p style="margin-top:8px"><strong>origin2</strong> — JUNGF1078/simulation-level-up-2<br><em style="font-size:12px;color:var(--green)">✓ aktif, Railway deploy dari sini</em></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 10 — BEFORE AFTER ══ -->
+<div class="slide" id="s10">
+  <div class="slide-header">
+    <div class="tag">09 · Before vs After</div>
+    <h2>Transformasi visual</h2>
+  </div>
+  <div class="cols">
+    <div class="col">
+      <div class="card" style="opacity:.7;margin-bottom:14px">
+        <div class="pill red" style="margin-bottom:12px">Before — Carbon</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+          <li><p>📐 IBM Plex Sans, dark background #161616</p></li>
+          <li><p>📐 Tidak ada phase bar</p></li>
+          <li><p>📐 Background polos gelap</p></li>
+          <li><p>📐 Budget sebagai teks biasa</p></li>
+          <li><p>📐 Scroll bermasalah di results screen</p></li>
+          <li><p>📐 Posisi hardcoded, beda di setiap layar</p></li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;font-size:28px;color:var(--muted)">→</div>
+    <div class="col">
+      <div class="card green" style="margin-bottom:14px">
+        <div class="pill green" style="margin-bottom:12px">After — Next Chapter ✓</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+          <li><p>✅ Merriweather + Outfit, warm cream #F2EBE5</p></li>
+          <li><p>✅ Phase pills numbered dengan active/done states</p></li>
+          <li><p>✅ Background ilustrasi sporty, stretch bebas</p></li>
+          <li><p>✅ Budget oval merah di pojok kanan</p></li>
+          <li><p>✅ Semua screen scrollable dengan benar</p></li>
+          <li><p>✅ Live Config Panel untuk tuning realtime</p></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="card blue" style="width:100%;margin-top:8px">
+    <h3 style="margin-bottom:8px">🎓 Key Takeaway</h3>
+    <p>Separasi concerns: <strong>background</strong> bebas stretch, <strong>UI layer</strong> fixed overlay, <strong>config vars</strong> di :root, <strong>logic</strong> di game.js. Masing-masing bisa diubah independen tanpa breaking yang lain.</p>
+  </div>
+</div>
+
+</div><!-- end deck -->
+
+<!-- Navigation -->
+<div id="nav">
+  <button class="nav-btn" onclick="go(-1)">← Prev</button>
+  <div class="dot-row" id="dots"></div>
+  <span id="slide-counter">1 / 10</span>
+  <button class="nav-btn" onclick="go(1)">Next →</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+
+// build dots
+const dotsEl = document.getElementById('dots');
+slides.forEach((_,i)=>{
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===0?' on':'');
+  d.onclick = ()=>goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n){
+  slides[cur].classList.remove('active');
+  dotsEl.children[cur].classList.remove('on');
+  cur = Math.max(0, Math.min(total-1, n));
+  slides[cur].classList.add('active');
+  dotsEl.children[cur].classList.add('on');
+  document.getElementById('slide-counter').textContent = (cur+1)+' / '+total;
+  document.getElementById('progress-bar').style.width = ((cur+1)/total*100)+'%';
+}
+function go(d){ goTo(cur+d); }
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+});
+
+// touch swipe
+let tx=0;
+document.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; });
+document.addEventListener('touchend', e=>{
+  const dx = e.changedTouches[0].clientX - tx;
+  if(Math.abs(dx)>50) go(dx<0?1:-1);
+});
+</script>
+</body>
+</html>
