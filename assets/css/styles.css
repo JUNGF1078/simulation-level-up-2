@@ -11,24 +11,24 @@
   --pb-step-gap:   58px;      /* spacing between each step pill        */
 
   /* ── Budget oval ────────────────────────────────── */
-  --budget-top:    8vh;       /* distance from top                     */
-  --budget-right:  18.75vw;   /* distance from right edge              */
+  --budget-top:    7.5vh;     /* distance from top                     */
+  --budget-right:  19.5vw;    /* distance from right edge              */
 
   /* ── Left notebook panel ────────────────────────── */
   --nb-top:        11vh;      /* below header                          */
-  --nb-bottom:     9vh;
-  --nb-left:       7.5vw;
-  --nb-right:      28vw;
+  --nb-bottom:     9.5vh;
+  --nb-left:       11vw;
+  --nb-right:      30vw;
   --nb-padding:    24px 28px;
   --nb-radius:     12px;
   --nb-bg:         #F2EBE5;
   --nb-shadow:     0 4px 32px rgba(30,58,110,0.15);
 
   /* ── Right preview/timer panel ──────────────────── */
-  --pv-top:        18vh;
+  --pv-top:        19vh;
   --pv-bottom:     9vh;
-  --pv-right:      11vw;
-  --pv-width:      15vw;
+  --pv-right:      10.5vw;
+  --pv-width:      15.5vw;
 
   /* ── Background image ───────────────────────────── */
   --bg-pos:        center center;
