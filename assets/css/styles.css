@@ -1,45 +1,52 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;overflow:hidden;}
 
 /* ════════════════════════════════════════════════════
    ██  LAYOUT CONFIG  — tweak here to reposition content
    ════════════════════════════════════════════════════ */
 :root{
+  /* Canvas size — referenced by #stage via --stage-w/--stage-h                */
+  --stage-w:       1684px;
+  --stage-h:       870px;
+
   /* ── Phase bar ──────────────────────────────────── */
-  --pb-top:        4vh;       /* vertical from top of screen           */
+  --pb-top:        40px;      /* vertical from top of canvas           */
   --pb-height:     40px;
-  --pb-shift-x:    -5vw;      /* horizontal nudge (negative = left)    */
-  --pb-step-gap:   58px;      /* spacing between each step pill        */
+  --pb-shift-x:    -115px;    /* horizontal nudge (negative = left)    */
+  --pb-step-gap:   96px;      /* spacing between each step pill        */
 
   /* ── Budget oval ────────────────────────────────── */
-  --budget-top:    7.5vh;     /* distance from top                     */
-  --budget-right:  19.5vw;    /* distance from right edge              */
+  --budget-top:    76px;
+  --budget-right:  280px;
 
   /* ── Left notebook panel ────────────────────────── */
-  --nb-top:        11vh;      /* below header                          */
-  --nb-bottom:     9.5vh;
-  --nb-left:       11vw;
-  --nb-right:      30vw;
+  --nb-top:        100px;
+  --nb-bottom:     80px;
+  --nb-left:       144px;
+  --nb-right:      472px;
   --nb-padding:    24px 28px;
   --nb-radius:     12px;
   --nb-bg:         #F2EBE5;
   --nb-shadow:     0 4px 32px rgba(30,58,110,0.15);
 
   /* ── Right preview/timer panel ──────────────────── */
-  --pv-top:        19vh;
-  --pv-bottom:     9vh;
-  --pv-right:      10.5vw;
-  --pv-width:      15.5vw;
+  --pv-top:        171px;
+  --pv-bottom:     81px;
+  --pv-right:      160px;
+  --pv-width:      240px;
 
   /* ── Background image ───────────────────────────── */
   --bg-pos:        center center;
   --bg-scale:      1;
+  --bg-x:          50%;
+  --bg-y:          50%;
 }
 /* ══════════════════════════════════════════════════ */
 
 /* ══ FULL-SCREEN LAYOUT ══ */
 body{min-height:100vh;overflow:hidden;height:100vh;}
 #app-wrapper{
-  position:fixed;inset:0;
+  position:absolute;inset:0;
   z-index:10;overflow:hidden;
   background:transparent;
 }
@@ -56,9 +63,9 @@ body{min-height:100vh;overflow:hidden;height:100vh;}
   box-shadow:var(--nb-shadow);
   display:flex;flex-direction:column;
 }
-.float-tools{position:fixed;bottom:20px;right:calc(var(--nb-right) + 16px)}
-.tool-panel{position:fixed;bottom:76px;right:calc(var(--nb-right) + 16px)}
-.toast{position:fixed;bottom:20px;left:50%}
+.float-tools{position:absolute;bottom:20px;right:calc(var(--nb-right) + 16px)}
+.tool-panel{position:absolute;bottom:76px;right:calc(var(--nb-right) + 16px)}
+.toast{position:absolute;bottom:20px;left:50%}
 
 /* ══ PHASE BAR — centered in header, nudge with --pb-shift-x ══ */
 #phase-bar{
@@ -240,7 +247,7 @@ body{min-height:100vh;overflow:hidden;height:100vh;}
   --topbar-h:     60px;
 }
 
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;font-size:14px;line-height:1.6}
+body{background:transparent;color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;font-size:14px;line-height:1.6}
 .screen{display:none;animation:fadeIn .3s ease}
 .screen.active{display:flex;flex-direction:column;min-height:0}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -340,7 +347,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
 /* ══ PLANNING ══ */
 #planning{display:none;flex-direction:column}
-#planning.active{display:flex;flex-direction:column;height:calc(100vh - var(--nb-top) - var(--nb-bottom));min-height:0}
+#planning.active{display:flex;flex-direction:column;height:calc(870px - var(--nb-top) - var(--nb-bottom));min-height:0}
 .planning-layout{display:flex;flex-direction:column;height:100%;overflow:hidden}
 .decisions-panel{flex:1;overflow-y:auto;padding:16px 20px;position:relative;background:var(--neutral-1);padding-top:40px}
 .preview-panel{background:var(--card);border-left:3px solid var(--blue-light);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
@@ -420,7 +427,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 /* LANGKAH KERJA PANEL */
 .tab-btn-help{margin-left:auto;background:var(--red);border:1.5px solid var(--red);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(217,37,82,0.25)}
 .tab-btn-help:hover{background:#b01c43;border-color:#b01c43;color:#fff}
-.lk-panel{position:absolute;top:52px;left:0;right:0;z-index:50;background:var(--card);border:1.5px solid var(--border-default);border-radius:0 0 12px 12px;max-height:70vh;overflow-y:auto;box-shadow:0 8px 32px var(--shadow)}
+.lk-panel{position:absolute;top:52px;left:0;right:0;z-index:50;background:var(--card);border:1.5px solid var(--border-default);border-radius:0 0 12px 12px;max-height:630px;overflow-y:auto;box-shadow:0 8px 32px var(--shadow)}
 .lk-panel-header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:2px solid rgba(0,0,0,.1);font-family:var(--font-serif);font-weight:900;font-size:14px;background:var(--red);color:#fff}
 .lk-close{background:none;border:none;color:rgba(255,255,255,.8);font-size:22px;cursor:pointer;padding:0 4px;line-height:1}
 .lk-close:hover{color:#fff}
@@ -612,7 +619,7 @@ canvas.radar{border-radius:10px}
 
 /* ══ TOAST ══ */
 .toast{
-  position:fixed;bottom:24px;left:50%;
+  position:absolute;bottom:24px;left:50%;
   transform:translateX(-50%) translateY(20px);
   background:var(--yellow);border:1.5px solid var(--yellow-accent);
   color:var(--neutral-dark);padding:10px 22px;border-radius:100px;
@@ -712,7 +719,7 @@ canvas.radar{border-radius:10px}
 #rs-bars .comp-row>div:last-child{width:100%}
 
 /* ══ FLOATING TOOLS ══ */
-.float-tools{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:200}
+.float-tools{position:absolute;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:200}
 .float-fab{
   width:48px;height:48px;border-radius:50%;border:none;
   background:var(--card);color:var(--text);
@@ -725,7 +732,7 @@ canvas.radar{border-radius:10px}
 .float-fab.active{background:var(--red);color:#fff;box-shadow:0 4px 0 #A01A3B,0 6px 16px rgba(217,37,82,.3)}
 
 .tool-panel{
-  position:fixed;bottom:90px;right:24px;width:320px;
+  position:absolute;bottom:90px;right:24px;width:320px;
   background:var(--card);border-radius:12px;z-index:199;
   box-shadow:0 8px 40px var(--shadow);overflow:hidden;
   animation:fadeIn .2s ease;
