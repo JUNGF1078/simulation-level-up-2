@@ -9,11 +9,16 @@
 </head>
 <body>
 
-<!-- ══ STAGE (Keypress-style) — fixed 1440×900 canvas, holds BG + app, scales uniformly ══ -->
-<div id="stage" style="position:fixed;top:50%;left:50%;width:var(--stage-w,1920px);height:var(--stage-h,870px);transform:translate(-50%,-50%) scale(var(--stage-scale,1));transform-origin:center center;">
+<!-- Layer 0: Background — scales with stage (letterboxes with content) -->
+<div id="bg-wrapper" style="position:fixed;inset:0;z-index:0;pointer-events:none;">
+<img id="bg-desk" src="Background Revised (2).png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:var(--bg-x,50%) var(--bg-y,50%);display:block;user-select:none;">
+</div>
 
-<!-- Background lives inside the stage → scales with content -->
-<img id="bg-desk" src="Background Revised.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--bg-x,50%) var(--bg-y,50%);transform:scale(var(--bg-scale,1));transform-origin:center center;z-index:0;pointer-events:none;user-select:none">
+<!-- ══ STAGE (Keypress-style) — fixed canvas, holds overlay + app content, scales uniformly ══ -->
+<div id="stage" style="position:fixed;top:50%;left:50%;width:var(--stage-w,1684px);height:var(--stage-h,870px);transform:translate(-50%,-50%) scale(var(--stage-scale,1));transform-origin:center center;z-index:1;">
+
+<!-- Layer 1: Notes frame — inside stage, scales with content -->
+<img id="overlay-frame" src="Group 626929 (1).png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:1;pointer-events:none;user-select:none;">
 
 <!-- ══ APP WRAPPER ══ -->
 <div id="app-wrapper">
@@ -103,14 +108,6 @@
         <button class="tab-btn tab-btn-help" onclick="toggleLangkahKerja()" aria-label="Langkah Kerja" title="Langkah Kerja">?</button>
       </div>
 
-      <!-- Langkah Kerja Overlay -->
-      <div id="langkah-kerja-panel" class="lk-panel" style="display:none">
-        <div class="lk-panel-header">
-          <span>📖 Langkah Kerja</span>
-          <button class="lk-close" onclick="toggleLangkahKerja()">&times;</button>
-        </div>
-        <div class="lk-panel-body" id="lk-body"></div>
-      </div>
 
       <!-- TAB: VENUE -->
       <div class="tab-pane active" id="tab-venue">
@@ -340,6 +337,16 @@
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
+<!-- ══ LANGKAH KERJA MODAL ══ -->
+<div id="lk-backdrop" class="lk-backdrop" style="display:none" onclick="toggleLangkahKerja()">
+  <div id="langkah-kerja-panel" class="lk-modal" onclick="event.stopPropagation()">
+    <div class="lk-modal-header">
+      <button class="lk-close" onclick="toggleLangkahKerja()">&times;</button>
+    </div>
+    <div class="lk-modal-body" id="lk-body"></div>
+  </div>
+</div>
+
 </div><!-- end #app-wrapper -->
 
 <script src="assets/js/game.js"></script>
@@ -401,6 +408,10 @@
     {key:'--pv-top',       label:'Timer top',           unit:'px',  min:50,   max:400, step:2},
     {key:'--pv-right',     label:'Timer right',         unit:'px',  min:0,    max:440, step:4},
     {key:'--pv-width',     label:'Timer width',         unit:'px',  min:120,  max:440, step:4},
+    {group:'Langkah Kerja Modal'},
+    {key:'--lk-width',     label:'Modal width',         unit:'px',  min:400,  max:1200, step:10},
+    {key:'--lk-offset-x',  label:'Offset X (→)',        unit:'px',  min:-600, max:600,  step:4},
+    {key:'--lk-offset-y',  label:'Offset Y (↓)',        unit:'px',  min:-400, max:400,  step:4},
     {group:'Background'},
     {key:'--bg-scale',     label:'BG scale',            unit:'',    min:0.5,  max:2.5, step:0.05},
     {key:'--bg-x',         label:'BG position X',       unit:'%',   min:0,    max:100, step:1},

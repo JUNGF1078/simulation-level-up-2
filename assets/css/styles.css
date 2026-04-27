@@ -10,10 +10,10 @@ html,body{background:#000;overflow:hidden;}
   --stage-h:       870px;
 
   /* ── Phase bar ──────────────────────────────────── */
-  --pb-top:        40px;      /* vertical from top of canvas           */
+  --pb-top:        24px;       /* vertical from top of canvas           */
   --pb-height:     40px;
-  --pb-shift-x:    -115px;    /* horizontal nudge (negative = left)    */
-  --pb-step-gap:   96px;      /* spacing between each step pill        */
+  --pb-shift-x:    -8px;      /* horizontal nudge (negative = left)    */
+  --pb-step-gap:   34px;      /* spacing between each step pill        */
 
   /* ── Budget oval ────────────────────────────────── */
   --budget-top:    76px;
@@ -34,6 +34,12 @@ html,body{background:#000;overflow:hidden;}
   --pv-bottom:     81px;
   --pv-right:      100px;
   --pv-width:      240px;
+
+  /* ── Langkah Kerja Modal ────────────────────────── */
+  --lk-width:      940px;
+  --lk-max-h:      80%;
+  --lk-offset-x:   -276px;
+  --lk-offset-y:   12px;
 
   /* ── Background image ───────────────────────────── */
   --bg-pos:        center center;
@@ -350,12 +356,12 @@ body{background:transparent;color:var(--text);font-family:var(--font);min-height
 #planning{display:none;flex-direction:column}
 #planning.active{display:flex;flex-direction:column;height:calc(870px - var(--nb-top) - var(--nb-bottom));min-height:0}
 .planning-layout{display:flex;flex-direction:column;height:100%;overflow:hidden}
-.decisions-panel{flex:1;overflow-y:auto;padding:16px 20px;position:relative;background:var(--neutral-1);padding-top:40px}
+.decisions-panel{flex:1;overflow-y:auto;padding:0 20px 16px;position:relative;background:var(--neutral-1)}
 .preview-panel{background:var(--card);border-left:3px solid var(--blue-light);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
 .timer-big{font-family:var(--font-serif);font-size:40px;font-weight:900;text-align:center;color:var(--green);font-variant-numeric:tabular-nums;letter-spacing:2px;padding:8px 0}
 
 /* TABS */
-.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:10;background:var(--neutral-1);padding:12px 0 10px;margin-bottom:4px}
 .tab-btn{
   padding:7px 16px;border-radius:100px;border:none;
   background:var(--red-light);color:var(--red);
@@ -425,16 +431,46 @@ body{background:transparent;color:var(--text);font-family:var(--font);min-height
 .profit-big .amount{font-family:var(--font-serif);font-size:24px;font-weight:900;margin-top:4px}
 .run-btn-wrap{padding:14px 20px;background:var(--card);border-top:2px solid var(--border-default);position:sticky;bottom:0}
 
-/* LANGKAH KERJA PANEL */
+/* LANGKAH KERJA — MODAL */
 .tab-btn-help{margin-left:auto;background:var(--red);border:1.5px solid var(--red);color:#fff;font-weight:900;box-shadow:0 2px 8px rgba(217,37,82,0.25);width:36px;height:36px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:18px;line-height:1;flex:0 0 auto}
 .tab-btn-help:hover{background:#b01c43;border-color:#b01c43;color:#fff}
-.lk-panel{position:absolute;top:52px;left:0;right:0;z-index:50;background:var(--card);border:1.5px solid var(--border-default);border-radius:0 0 12px 12px;max-height:630px;display:flex;flex-direction:column;box-shadow:0 8px 32px var(--shadow);overflow:hidden}
-.lk-panel-header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:2px solid rgba(0,0,0,.1);font-family:var(--font-serif);font-weight:900;font-size:14px;background:var(--red);color:#fff;flex-shrink:0}
-.lk-close{background:none;border:none;color:rgba(255,255,255,.8);font-size:22px;cursor:pointer;padding:0 4px;line-height:1}
-.lk-close:hover{color:#fff}
-.lk-panel-body{padding:16px 20px;overflow-y:auto;flex:1;min-height:0}
-.lk-panel-body h3{font-family:var(--font-serif);font-size:13px;font-weight:900;margin-bottom:8px;color:var(--red)}
-.lk-panel-body .obj-item{font-size:12px;margin-bottom:6px}
+.lk-backdrop{
+  position:absolute;inset:0;
+  background:rgba(10,20,50,0.60);z-index:90;
+  display:flex;align-items:center;justify-content:center;
+}
+.lk-modal{
+  position:relative;
+  width:var(--lk-width,860px);max-height:var(--lk-max-h,80%);
+  margin-left:var(--lk-offset-x,0px);
+  margin-top:var(--lk-offset-y,0px);
+  z-index:91;display:flex;flex-direction:column;
+  border-radius:14px;overflow:hidden;
+  background:#fff;
+  box-shadow:0 12px 48px rgba(0,0,0,0.35);
+  flex-shrink:0;
+}
+.lk-modal-header{
+  display:flex;justify-content:flex-end;align-items:center;
+  padding:8px 12px 0;
+  flex-shrink:0;background:#fff;
+}
+.lk-close{background:none;border:none;color:#999;font-size:26px;cursor:pointer;padding:0 4px;line-height:1}
+.lk-close:hover{color:#333}
+.lk-modal-body{
+  padding:4px 24px 20px;overflow-y:auto;flex:1;min-height:0;
+  background:#fff;color:#222;
+}
+.lk-modal-body h3{
+  font-family:var(--font-serif);font-size:11px;font-weight:900;color:var(--red);
+  background:rgba(217,37,82,0.12);border-radius:6px;
+  padding:5px 14px;display:inline-flex;align-items:center;gap:6px;
+  margin:16px 0 10px;text-transform:uppercase;letter-spacing:.5px;
+}
+.lk-modal-body h3:first-child{margin-top:0}
+.lk-modal-body .obj-item{font-size:13px;padding:8px 0;border-bottom:1px solid var(--border-default);display:flex;gap:10px;align-items:flex-start;line-height:1.5;color:#333}
+.lk-modal-body .obj-item:last-child{border-bottom:none}
+.lk-modal-body .obj-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
 
 /* BUTTONS */
 .btn{

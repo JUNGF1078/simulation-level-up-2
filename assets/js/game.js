@@ -489,12 +489,13 @@ function buildBriefing(){
 }
 
 function toggleLangkahKerja(){
-  const panel=document.getElementById('langkah-kerja-panel');
-  if(panel.style.display==='none'){
+  const backdrop=document.getElementById('lk-backdrop');
+  const open=backdrop.style.display==='none'||backdrop.style.display==='';
+  if(open){
     document.getElementById('lk-body').innerHTML=document.getElementById('briefing-objectives').innerHTML;
-    panel.style.display='block';
+    backdrop.style.display='flex';
   } else {
-    panel.style.display='none';
+    backdrop.style.display='none';
   }
 }
 
